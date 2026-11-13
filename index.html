@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#667b58">
+
+  <title>Pfotenpause – Deine Katzenpension</title>
+
+  <link rel="stylesheet" href="style.css">
+  <script src="game.js" defer></script>
+</head>
+
+<body>
+  <main class="app">
+
+    <!-- STARTSEITE -->
+    <section id="startseite" aria-labelledby="starttitel">
+
+      <header class="startkopf">
+        <p class="untertitel">
+          Ein kleiner Hof. Fünf große Persönlichkeiten.
+        </p>
+
+        <h1 id="starttitel" tabindex="-1">
+          Willkommen in der Katzenpension
+        </h1>
+
+        <p>
+          Hereinspaziert! Hinter der Gartenpforte
+          wartet deine Pfotenpause.
+        </p>
+      </header>
+
+      <div class="hofszene">
+        <img
+          id="hofbild"
+          src="bilder/hof.png"
+          alt="Ein gemütlicher Katzenhof mit Haus, Garten und Holzpforte."
+          width="768"
+          height="768"
+        >
+
+        <div id="hofErsatz" class="hof-ersatz" hidden>
+          <span aria-hidden="true">🏡</span>
+          <p>Hier gehört dein Hofbild hin.</p>
+          <small>Speichere es als bilder/hof.png.</small>
+        </div>
+
+        <button
+          id="gartenpforte"
+          class="gartenpforte"
+          type="button"
+          aria-label="Gartenpforte öffnen und Pfotenpause spielen"
+		  title="Pension betreten"
+        ></button>
+      </div>
+
+    
+    </section>
+
+    <!-- SPIELSEITE -->
+    <section
+      id="spielseite"
+      aria-labelledby="spieltitel"
+      hidden
+    >
+
+      <nav class="spielnavigation" aria-label="Spielnavigation">
+        <button id="zumHof" class="knopf dezent" type="button">
+          ← Zurück zum Hof
+        </button>
+
+        <span class="levelmarke">Schlafplan 1</span>
+      </nav>
+
+      <header class="spielkopf">
+        <p class="untertitel">Die Abendruhe beginnt</p>
+
+        <h1 id="spieltitel" tabindex="-1">Pfotenpause</h1>
+
+        <p>
+          Finde für jeden Gast einen friedlichen Schlafplatz.
+        </p>
+      </header>
+
+      <div
+        id="katzenliste"
+        class="katzenliste"
+        aria-label="Unsere fünf Gäste"
+      ></div>
+
+      <details class="regeln">
+        <summary>Wie funktioniert der Schlafplan?</summary>
+
+        <ol>
+          <li>Genau eine Katze pro Reihe und Spalte.</li>
+          <li>Genau eine Katze pro farbigem Bereich A bis E.</li>
+          <li>Katzen dürfen sich nicht berühren, auch nicht diagonal.</li>
+        </ol>
+
+        <p>
+          Jeder Bereich gehört zu einer bestimmten Katze.
+          Ein × ist nur deine Denkstütze.
+        </p>
+      </details>
+
+      <div class="werkzeuge" aria-label="Werkzeug auswählen">
+        <button
+          id="katzenWerkzeug"
+          class="knopf"
+          type="button"
+          aria-pressed="true"
+        >
+          🐾 Katze setzen
+        </button>
+
+        <button
+          id="ausschlussWerkzeug"
+          class="knopf"
+          type="button"
+          aria-pressed="false"
+        >
+          × Feld ausschließen
+        </button>
+      </div>
+
+      <p class="bedienhinweis">
+        Werkzeug wählen und ein Feld antippen.
+        Erneutes Antippen entfernt die gleiche Markierung.
+      </p>
+
+      <div class="brettumrandung">
+        <div
+          id="spielfeld"
+          aria-label="Schlafplan mit fünf Reihen und fünf Spalten"
+        ></div>
+      </div>
+
+      <div class="spielstatus">
+        <p id="katzenzaehler">Katzen: 0 von 5</p>
+        <p class="kleinerhinweis">
+          Streit wird erst beim Prüfen sichtbar.
+        </p>
+      </div>
+
+      <div class="aktionen">
+        <button id="pruefen" class="knopf primaer" type="button">
+          Schlafen alle friedlich?
+        </button>
+
+        <button id="zuruecksetzen" class="knopf" type="button">
+          Neu versuchen
+        </button>
+      </div>
+
+      <p id="meldung" class="meldung" role="status">
+        Die Katzen warten auf ihre Schlafplätze.
+      </p>
+
+      <p
+        id="bildhinweis"
+        class="bildhinweis"
+        role="status"
+        hidden
+      ></p>
+
+    </section>
+
+    <noscript>
+      Für dieses Spiel muss JavaScript aktiviert sein.
+    </noscript>
+
+  </main>
+</body>
+</html>
