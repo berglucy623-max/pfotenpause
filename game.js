@@ -514,7 +514,7 @@ function pruefeLoesung() {
   aktualisiereAnzeige();
 
   zeigeMeldung(
-    "Pssst … alle schlafen! Die Abendruhe ist gerettet. 💤",
+    "Pssst … alle schlafen! Die Abendruhe beginnt💤",
     "erfolg"
   );
 }
