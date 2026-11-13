@@ -6,13 +6,47 @@
 
 const groesse = 5;
 
-const bereiche = [
-  [0, 0, 0, 0, 0],
-  [0, 0, 1, 1, 2],
-  [0, 3, 3, 2, 2],
-  [3, 3, 4, 4, 4],
-  [3, 4, 4, 4, 4]
+// Hier liegt unsere Sammlung vorbereiteter Rätsel.
+const levelListe = [
+  {
+    name: "Tag 1",
+    bereiche: [
+      [0, 0, 0, 0, 0],
+      [0, 0, 1, 1, 2],
+      [0, 3, 3, 2, 2],
+      [3, 3, 4, 4, 4],
+      [3, 4, 4, 4, 4]
+    ]
+  },
+
+  {
+    name: "Tag 2",
+    bereiche: [
+      [3, 3, 0, 0, 0],
+      [4, 3, 3, 0, 0],
+      [4, 4, 1, 1, 0],
+      [4, 4, 2, 1, 0],
+      [4, 4, 2, 1, 0]
+    ]
+  },
+
+  {
+    name: "Tag 3",
+    bereiche: [
+      [4, 4, 3, 3, 3],
+      [4, 4, 4, 4, 3],
+      [2, 2, 2, 2, 0],
+      [2, 1, 1, 0, 0],
+      [0, 0, 0, 0, 0]
+    ]
+  }
 ];
+
+// Wir beginnen mit dem ersten Schlafplan.
+let aktuellesLevel = 0;
+
+// Anders als bisher kann der aktive Farblayout-Plan wechseln.
+let bereiche = levelListe[aktuellesLevel].bereiche;
 
 // "schlafBild" ist die Position auf der Schlaf-Tafel.
 // "anderesBild" ist die Position auf den anderen Tafeln.
@@ -362,6 +396,19 @@ function aktualisiereAnzeige() {
     `Katzen: ${anzahlKatzen} von ${groesse}`;
 
   aktualisiereKatzenliste();
+
+  // Der rechte Button passt sich dem Spielzustand an.
+  const weiterKnopf = document.getElementById("zuruecksetzen");
+  const weitererTagVorhanden =
+    aktuellesLevel + 1 < levelListe.length;
+
+  if (!geloest) {
+    weiterKnopf.textContent = "Neu versuchen";
+  } else if (weitererTagVorhanden) {
+    weiterKnopf.textContent = "Weiter →";
+  } else {
+    weiterKnopf.textContent = "Zum Hof →";
+  }
 }
 
 function klickeFeld(index) {
@@ -383,6 +430,10 @@ function klickeFeld(index) {
 }
 
 function erstelleSpielfeld() {
+  // Alte Felder entfernen, bevor wir den neuen Plan aufbauen.
+  spielfeld.replaceChildren();
+  feldButtons.length = 0;
+
   for (let index = 0; index < zustand.length; index++) {
     const reihe = Math.floor(index / groesse);
     const spalte = index % groesse;
@@ -392,6 +443,7 @@ function erstelleSpielfeld() {
 
     feld.type = "button";
     feld.className = "feld";
+
     feld.style.setProperty(
       "--bereichsfarbe",
       katzen[bereich].farbe
@@ -551,8 +603,90 @@ document.getElementById("pruefen").addEventListener(
 
 document.getElementById("zuruecksetzen").addEventListener(
   "click",
-  setzeZurueck
+  function () {
+    // Solange das Rätsel nicht gelöst ist:
+    // den aktuellen Tag erneut versuchen.
+    if (!geloest) {
+      setzeZurueck();
+      return;
+    }
+
+    const naechsterTag = aktuellesLevel + 1;
+
+    if (naechsterTag < levelListe.length) {
+      // Den nächsten Tag mit leerem Spielfeld öffnen.
+      wechsleLevel(naechsterTag);
+
+      // Auf dem Handy wieder zum Spielanfang springen.
+      document.getElementById("spieltitel").focus({
+        preventScroll: true
+      });
+
+      window.scrollTo(0, 0);
+    } else {
+      // Alle vorhandenen Tage geschafft: zurück zum Hof.
+      zeigeSeite(false);
+    }
+  }
 );
 
-erstelleSpielfeld();
-aktualisiereAnzeige();
+// =====================================================
+// LEVELAUSWAHL UND LEVELWECHSEL
+// =====================================================
+
+function wechsleLevel(index) {
+  // Nur vorhandene Level zulassen.
+  if (
+    !Number.isInteger(index) ||
+    index < 0 ||
+    index >= levelListe.length
+  ) {
+    return;
+  }
+
+  aktuellesLevel = index;
+  bereiche = levelListe[aktuellesLevel].bereiche;
+
+  // Alle Markierungen und Prüfergebnisse zurücksetzen.
+  zustand.fill(0);
+  konflikte.clear();
+  geloest = false;
+
+  waehleWerkzeug(1);
+
+  // Den neuen Farblayout-Plan anzeigen.
+  erstelleSpielfeld();
+  aktualisiereAnzeige();
+
+  document.getElementById("levelauswahl").value = String(index);
+
+  zeigeMeldung(
+    `${levelListe[index].name}: ` +
+    "Die Gäste warten auf ihre Schlafplätze."
+  );
+}
+
+function initialisiereLevelauswahl() {
+  const auswahl = document.getElementById("levelauswahl");
+
+  auswahl.replaceChildren();
+
+  levelListe.forEach(function (level, index) {
+    const option = document.createElement("option");
+
+    option.value = String(index);
+    option.textContent = level.name;
+
+    auswahl.appendChild(option);
+  });
+
+  auswahl.addEventListener("change", function () {
+    wechsleLevel(Number(auswahl.value));
+  });
+
+  // Beim Öffnen das erste Level laden.
+  wechsleLevel(0);
+}
+
+// Das Spiel mit seiner Levelauswahl starten.
+initialisiereLevelauswahl();

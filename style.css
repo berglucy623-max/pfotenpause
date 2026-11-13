@@ -209,10 +209,27 @@ button:focus-visible {
   gap: 8px;
 }
 
-.levelmarke {
-  color: #817562;
+/* Levelauswahl rechts neben dem Rückweg zum Hof. */
+.levelauswahl {
+  flex: 0 1 160px;
+  min-width: 0;
+  max-width: 160px;
+  min-height: 44px;
+
+  padding: 8px;
+  border: 1px solid #d6c6ad;
+  border-radius: 10px;
+
+  font: inherit;
   font-size: 12px;
-  white-space: nowrap;
+  color: var(--text);
+  background: #f5efdf;
+  cursor: pointer;
+}
+
+.levelauswahl:focus-visible {
+  outline: 3px solid #304d72;
+  outline-offset: 2px;
 }
 
 .spielkopf {
@@ -448,7 +465,7 @@ button:focus-visible {
     gap: 6px;
   }
 
-  .levelmarke {
+  .levelauswahl {
     font-size: 11px;
   }
 
