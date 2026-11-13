@@ -359,16 +359,9 @@ button:focus-visible {
   height: 94%;
 }
 
+/* Die Farbbereiche brauchen keine sichtbaren Buchstaben mehr. */
 .feld-buchstabe {
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  z-index: 1;
-  padding: 2px 4px;
-  border-radius: 4px;
-  background: #ffffff99;
-  font-size: 10px;
-  font-weight: bold;
+  display: none;
 }
 
 .ausschluss {
@@ -433,27 +426,147 @@ button:focus-visible {
   font-size: 12px;
 }
 
-@media (max-width: 420px) {
+/* =========================================
+   HANDY-DESIGN
+   ========================================= */
+
+@media (max-width: 600px) {
+
+  /* Weniger Außenrand: mehr Platz für das Spiel. */
   body {
-    padding: 12px 8px;
+    padding: 8px 6px;
   }
 
   #spielseite {
-    padding: 14px 10px;
+    width: 100%;
+    padding: 12px 10px;
+    border-radius: 18px;
   }
 
-  .knopf {
+  /* Kompakter Kopfbereich. */
+  .spielnavigation {
+    gap: 6px;
+  }
+
+  .levelmarke {
+    font-size: 11px;
+  }
+
+  .spielkopf {
+    margin: 10px 0 12px;
+  }
+
+  .spielkopf .untertitel {
+    display: none;
+  }
+
+  .spielkopf h1 {
+    margin: 4px 0 6px;
+    font-size: 32px;
+  }
+
+  .spielkopf p:last-child {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  /* Alle fünf Gäste bleiben nebeneinander. */
+  #katzenliste {
+    gap: 5px;
+    margin-bottom: 12px;
+  }
+
+  #katzenliste .katzenkarte {
+    padding: 6px 3px 10px;
+    border-radius: 10px;
+  }
+
+  #katzenliste .katzenbild {
+    margin-bottom: 6px;
+  }
+
+  #katzenliste .katzenname {
+    font-size: 11px;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+  }
+
+  /* Regeln bleiben aufklappbar. */
+  .regeln {
+    margin-bottom: 12px;
+    padding: 10px;
+  }
+
+  .regeln summary {
+    line-height: 1.5;
+  }
+
+  /* Schaltflächen bleiben gut antippbar. */
+  #spielseite .knopf {
+    min-height: 44px;
     padding: 10px 8px;
     font-size: 13px;
+    line-height: 1.3;
   }
 
+  .werkzeuge,
+  .aktionen {
+    gap: 6px;
+  }
+
+  .bedienhinweis {
+    margin: 8px 0 10px;
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  /* Schmalerer Holzrahmen, größere Spielfläche. */
   .brettumrandung {
-    padding: 6px;
+    padding: 5px;
+    border-radius: 13px;
   }
 
-  .pfortenschild {
-    padding: 7px 9px;
+  #spielfeld {
+    gap: 3px;
+  }
+
+  #spielfeld .feld {
+    border-radius: 6px;
+  }
+
+  /* Kompakter Abschluss unter dem Spielfeld. */
+  .spielstatus {
+    margin: 12px 0 10px;
+  }
+
+  #katzenzaehler {
     font-size: 14px;
+  }
+
+  .kleinerhinweis {
+    font-size: 11px;
+  }
+
+  .meldung {
+    min-height: 0;
+    margin-top: 10px;
+    padding: 12px;
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  /* Auch die Hofüberschrift bekommt kleinere Abstände. */
+  .startkopf {
+    padding: 6px 8px 12px;
+  }
+
+  .startkopf h1 {
+    font-size: 28px;
+  }
+
+  .startkopf p:last-child {
+    font-size: 13px;
   }
 }
   

@@ -288,7 +288,7 @@ function aktualisiereKatzenliste() {
 
     const name = document.createElement("span");
     name.className = "katzenname";
-    name.textContent = `${gast.bereich} · ${gast.name}`;
+    name.textContent = gast.name;
 
     karte.append(
       erstelleKatzenBild(bereich, pose),
@@ -459,7 +459,7 @@ function pruefeLoesung() {
         const gast = katzen[erste.bereich];
 
         gruende.add(
-          `Im Bereich ${gast.bereich} ist nur ein Platz für ${gast.name}.`
+          `Im Bereich von ${gast.name} darf nur eine Katze liegen.`
         );
         konflikt = true;
       }
