@@ -1,4 +1,7 @@
-/* Grundgestaltung */
+/* =========================================
+   GRUNDGESTALTUNG
+   ========================================= */
+
 * {
   box-sizing: border-box;
 }
@@ -26,7 +29,7 @@ body {
 
 .app {
   width: 100%;
-  max-width: 720px;
+  max-width: 900px;
   margin: 0 auto;
 }
 
@@ -35,6 +38,17 @@ h1 {
   font-family: Georgia, serif;
   font-size: clamp(28px, 5vw, 42px);
   line-height: 1.15;
+}
+
+/* Überschriften werden bei Seitenwechseln fokussiert. */
+h1:focus {
+  outline: none;
+}
+
+h2 {
+  margin: 0 0 8px;
+  font-family: Georgia, serif;
+  font-size: 20px;
 }
 
 p {
@@ -54,13 +68,14 @@ button {
   touch-action: manipulation;
 }
 
-button:focus-visible {
+button:focus-visible,
+select:focus-visible {
   outline: 3px solid #304d72;
   outline-offset: 4px;
 }
 
 .knopf {
-  min-height: 46px;
+  min-height: 44px;
   padding: 11px 15px;
   border: 2px solid #d6c6ad;
   border-radius: 12px;
@@ -84,24 +99,40 @@ button:focus-visible {
 }
 
 .knopf.dezent {
-  min-height: 40px;
   padding: 8px 10px;
   border-color: transparent;
   background: transparent;
 }
 
-/* Startseite */
-.startkopf,
-.startfuss {
+.spielnavigation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.spielkopf {
+  margin: 20px 0 16px;
   text-align: center;
+}
+
+.spielkopf p:last-child {
+  margin-bottom: 0;
+  font-size: 14px;
+}
+
+/* =========================================
+   HOF UND GARTENTOR
+   ========================================= */
+
+#startseite {
+  max-width: 720px;
+  margin: 0 auto;
 }
 
 .startkopf {
   padding: 8px 16px 16px;
-}
-
-.startkopf p:last-child {
-  margin-bottom: 0;
+  text-align: center;
 }
 
 .hofszene {
@@ -109,7 +140,7 @@ button:focus-visible {
   width: 100%;
   aspect-ratio: 1;
   overflow: hidden;
-  border: 5px solid #fffaf0;
+  border: 5px solid var(--papier);
   border-radius: 24px;
   background: #dce8ca;
   box-shadow: 0 15px 45px #49382d26;
@@ -140,59 +171,204 @@ button:focus-visible {
   margin-bottom: 0;
 }
 
-/*
-  Die unsichtbare Schaltfläche liegt über der Gartenpforte.
-  Prozentwerte sorgen dafür, dass sie beim Verkleinern mitwandert.
-*/
 .gartenpforte {
   position: absolute;
   left: 30%;
   top: 74%;
-  width: 22%;
+  width: 25%;
   height: 26%;
+  margin: 0;
   padding: 0;
   border: 0;
-  border-radius: 14px 14px 0 0;
   background: transparent;
+  clip-path: polygon(
+    0% 17%, 15% 7%, 35% 1%, 50% 0%,
+    70% 5%, 88% 14%, 100% 24%,
+    100% 100%, 0% 100%
+  );
 }
 
-.gartenpforte:hover {
-  background: #fff7c72e;
-}
-
-.pfortenschild {
+.gartenpforte::after {
+  content: "";
   position: absolute;
-  top: 6%;
   left: 50%;
-  transform: translateX(-50%);
-  width: max-content;
-  padding: 9px 13px;
-  border: 3px solid #714a2f;
-  border-radius: 8px;
-  color: #58381f;
-  background: #ffe8b8;
-  box-shadow: 0 4px 8px #30201240;
-  font-family: Georgia, serif;
-  font-weight: bold;
+  top: 50%;
+  width: 0;
+  height: 0;
+  border-top: 18px solid transparent;
+  border-bottom: 18px solid transparent;
+  border-left: 28px solid rgba(255, 250, 240, 0.7);
+  transform: translate(-40%, -50%);
+  filter: drop-shadow(0 2px 3px rgba(60, 35, 15, 0.3));
+  pointer-events: none;
 }
 
-.pfortenschild small {
+.gartenpforte:hover::after,
+.gartenpforte:focus-visible::after {
+  border-left-color: rgba(255, 250, 240, 0.95);
+}
+
+.gartenpforte:focus-visible {
+  outline: none;
+  background: #fff3b833;
+  box-shadow: inset 0 0 0 4px #fff3b8;
+}
+
+/* =========================================
+   EINGANG UND SPIELREGAL
+   ========================================= */
+
+#eingangsseite > .spielnavigation {
+  padding: 0 4px;
+}
+
+.eingangsszene {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1367 / 768;
+  overflow: hidden;
+  border: 5px solid var(--papier);
+  border-radius: 24px;
+  background: #bd956a;
+  box-shadow: 0 15px 45px #49382d26;
+}
+
+.regalraum {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.eingangsbild {
   display: block;
-  margin-top: 3px;
-  font-family: Arial, sans-serif;
-  font-size: 11px;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-.startfuss {
-  padding: 10px 12px 20px;
+/* Zwei zusammengehörige Spielboxen innerhalb der Regalfächer. */
+.regalspiel {
+  position: absolute;
+  left: 37%;
+  width: 41%;
+  height: 11.5%;
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  align-items: center;
+  gap: 8px;
+
+  padding: 4px 8px;
+  overflow: hidden;
+
+  border: 2px solid #785033;
+  border-radius: 9px;
+  color: var(--text);
+  background: linear-gradient(135deg, #fff0d0, #e9c994);
+  box-shadow: 0 2px 3px #3d241e33;
 }
 
-.startfuss p {
-  font-size: 14px;
+/* Abstand zur oberen und unteren Kante des jeweiligen Fachs. */
+.regalspiel-pfoten {
+  top: 17.5%;
 }
 
-/* Spielseite */
-#spielseite {
+.regalspiel-memory {
+  top: 36.5%;
+}
+
+.regalspiel:hover {
+  background: linear-gradient(135deg, #fff6e3, #f2d7aa);
+}
+
+.regalspiel:focus-visible {
+  outline-color: #fff2c1;
+  outline-offset: 3px;
+}
+
+/* Vorschau bleibt vollständig innerhalb der Spielbox. */
+.regal-vorschau {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.regal-vorschau > img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Zwei Memorykarten nebeneinander, ohne überstehende Drehung. */
+.kartenstapel > img {
+  top: 5%;
+  bottom: auto;
+  width: 54%;
+  height: 90%;
+  transform: none;
+}
+
+.kartenstapel > img:first-child {
+  left: 0;
+}
+
+.kartenstapel > img:last-child {
+  left: auto;
+  right: 0;
+}
+
+/* Der Titel gehört zur Box, kein zusätzliches Holzschild. */
+.regalschild {
+  position: relative;
+  min-width: 0;
+  padding: 0 18px 0 0;
+
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  text-align: left;
+}
+
+.regalschild strong {
+  display: block;
+  font-family: Georgia, serif;
+  font-size: clamp(12px, 1.8vw, 18px);
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.regalschild small {
+  display: none;
+}
+
+.regalschild::after {
+  content: "";
+  position: absolute;
+  right: 2px;
+  top: 50%;
+
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  border-left: 8px solid #805539;
+
+  transform: translateY(-50%);
+}
+
+/* =========================================
+   GEMEINSAME SPIELSEITEN
+   ========================================= */
+
+#spielseite,
+#memoryseite {
+  width: 100%;
   max-width: 560px;
   margin: 0 auto;
   padding: 20px;
@@ -202,24 +378,14 @@ button:focus-visible {
   box-shadow: 0 12px 40px #49382d14;
 }
 
-.spielnavigation {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-/* Levelauswahl rechts neben dem Rückweg zum Hof. */
 .levelauswahl {
-  flex: 0 1 160px;
+  flex: 0 1 110px;
   min-width: 0;
-  max-width: 160px;
+  max-width: 110px;
   min-height: 44px;
-
   padding: 8px;
   border: 1px solid #d6c6ad;
   border-radius: 10px;
-
   font: inherit;
   font-size: 12px;
   color: var(--text);
@@ -227,77 +393,72 @@ button:focus-visible {
   cursor: pointer;
 }
 
-.levelauswahl:focus-visible {
-  outline: 3px solid #304d72;
-  outline-offset: 2px;
-}
+/* =========================================
+   PFOTENPAUSE: KATZEN UND SPIELFELD
+   ========================================= */
 
-.spielkopf {
-  margin: 20px 0 16px;
-  text-align: center;
-}
-
-.spielkopf h1 {
-  font-size: 40px;
-}
-
-.spielkopf p:last-child {
-  margin-bottom: 0;
-  font-size: 14px;
-}
-
-/* Die fünf Gäste oberhalb des Spielfelds */
-.katzenliste {
+#katzenliste {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 6px;
   margin-bottom: 16px;
 }
 
-.katzenkarte {
+#katzenliste .katzenkarte {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   min-width: 0;
-  padding: 5px 3px 8px;
+  padding: 8px 5px 13px;
+  overflow: hidden;
   border: 1px solid #49382d1a;
   border-radius: 12px;
-  text-align: center;
   background: var(--bereichsfarbe);
-}
-
-.katzenkarte .katzenbild {
-  aspect-ratio: 1;
-}
-
-.katzenname {
-  display: block;
-  font-size: 11px;
-  font-weight: bold;
+  text-align: center;
 }
 
 .katzenbild {
-  display: grid;
-  width: 100%;
-  height: 100%;
+  position: relative;
+  display: block;
   min-width: 0;
+  min-height: 0;
+  overflow: hidden;
 }
 
-.katzenbild > * {
-  grid-area: 1 / 1;
+#katzenliste .katzenbild {
+  flex: 0 0 auto;
+  width: 100%;
+  aspect-ratio: 1;
+  margin-bottom: 7px;
 }
 
-.katzenbild canvas {
+.katzenbild > img {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
   height: 100%;
   object-fit: contain;
 }
 
-.ersatzkatze {
+.katzenbild > .ersatzkatze {
+  position: absolute;
+  inset: 0;
   display: grid;
   place-items: center;
   font-size: 30px;
 }
 
-/* Regeln und Werkzeuge */
+#katzenliste .katzenname {
+  flex: 0 0 auto;
+  width: 100%;
+  margin: 0;
+  font-size: 11px;
+  font-weight: bold;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
 .regeln {
   margin: 0 0 16px;
   padding: 12px 14px;
@@ -328,17 +489,15 @@ button:focus-visible {
   gap: 8px;
 }
 
+.werkzeuge {
+  margin-bottom: 12px;
+}
+
 .werkzeuge button[aria-pressed="true"] {
   border-color: var(--gruen);
   background: #e4edd9;
 }
 
-.bedienhinweis {
-  color: #847563;
-  font-size: 12px;
-}
-
-/* Spielfeld mit einer holzartigen Umrandung */
 .brettumrandung {
   padding: 9px;
   border: 2px solid #70492f;
@@ -372,11 +531,10 @@ button:focus-visible {
 }
 
 .feld .katzenbild {
-  width: 94%;
-  height: 94%;
+  position: absolute;
+  inset: 3%;
 }
 
-/* Die Farbbereiche brauchen keine sichtbaren Buchstaben mehr. */
 .feld-buchstabe {
   display: none;
 }
@@ -395,7 +553,6 @@ button:focus-visible {
   border-color: #587b40;
 }
 
-/* Status und Nachrichten */
 .spielstatus {
   margin: 17px 0 12px;
   text-align: center;
@@ -441,32 +598,232 @@ button:focus-visible {
   border-radius: 8px;
   color: #80552c;
   font-size: 12px;
+  overflow-wrap: anywhere;
 }
 
 /* =========================================
-   HANDY-DESIGN
+   MEMORY UND GESCHICHTEN
+   ========================================= */
+
+.buchmarke {
+  color: #847563;
+  font-size: 11px;
+  text-align: right;
+}
+
+.memory-status {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.memoryfeld {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.memorykarte {
+  position: relative;
+  min-width: 0;
+  aspect-ratio: 1;
+  padding: 0;
+  overflow: hidden;
+  border: 2px solid #9b7754;
+  border-radius: 15px;
+  background:
+    radial-gradient(circle at top, #f7e6c7, transparent 75%),
+    #e0c29b;
+  box-shadow: 0 3px 0 #9b7754;
+  color: var(--text);
+}
+
+.memorykarte .kartenruecken {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: clamp(28px, 7vw, 46px);
+  opacity: 0.65;
+}
+
+.memorykarte > img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.memorykarte .kartenersatz {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 8px;
+  font-size: 12px;
+  text-align: center;
+}
+
+.memorykarte.aufgedeckt {
+  border-color: #795d43;
+  background: #fffaf0;
+}
+
+.memorykarte.gefunden {
+  border-color: #667b58;
+  box-shadow: 0 3px 0 #667b58;
+  cursor: default;
+}
+
+.memorykarte:disabled {
+  opacity: 1;
+}
+
+/* Geschichtenfenster: warm, verspielt und etwas comicartig. */
+body.geschichte-offen {
+  overflow: hidden;
+}
+
+.geschichte-dialog {
+  width: min(420px, calc(100% - 32px));
+  max-height: calc(100dvh - 32px);
+  margin: auto;
+  padding: 24px;
+
+  overflow: auto;
+  border: 3px solid var(--holz);
+  border-radius: 22px;
+
+  color: var(--text);
+  background:
+    radial-gradient(circle, #80553915 1px, transparent 1px)
+    0 0 / 12px 12px,
+    #fff4db;
+
+  box-shadow: 7px 7px 0 #49382d55;
+}
+
+/* Beide Fenster verwenden denselben abgedunkelten Hintergrund. */
+.geschichte-dialog::backdrop,
+.memory-abschluss::backdrop {
+  background: rgba(40, 28, 20, 0.55);
+  backdrop-filter: blur(3px);
+}
+
+.geschichte-form {
+  position: relative;
+  margin: 0;
+}
+
+.geschichte-schliessen {
+  position: absolute;
+  top: -12px;
+  right: -12px;
+
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+
+  border: 2px solid var(--holz);
+  border-radius: 50%;
+  color: var(--text);
+  background: var(--papier);
+
+  font-size: 28px;
+  line-height: 1;
+}
+
+.geschichte-kicker {
+  margin: 0 30px 14px 0;
+  color: #7d6245;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/* Illustration zur Geschichte – größer als das bisherige Kartenmotiv. */
+.geschichte-motiv {
+  display: block;
+  width: 180px;
+  max-width: 100%;
+  height: 180px;
+  margin: 0 auto 16px;
+  object-fit: contain;
+}
+
+.geschichte-dialog h2 {
+  margin: 0 0 12px;
+  font-size: 24px;
+  line-height: 1.2;
+}
+
+.geschichte-dialog #geschichteText {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+
+/* Abschluss als zentriertes Fenster – ohne Schließen-Kreuz. */
+.memory-abschluss {
+  width: min(420px, calc(100% - 32px));
+  max-height: calc(100dvh - 32px);
+  margin: auto;
+  padding: 24px;
+  overflow: auto;
+
+  border: 3px solid var(--holz);
+  border-radius: 22px;
+
+  color: var(--text);
+  background: #e0eed6;
+  box-shadow: 7px 7px 0 #49382d55;
+  text-align: center;
+}
+
+.memory-abschluss h2 {
+  margin: 0 0 14px;
+}
+
+.memory-abschluss p {
+  margin: 0 0 22px;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.memory-abschluss .knopf {
+  width: 100%;
+}
+
+
+.memory-neustart {
+  width: 100%;
+  margin-top: 14px;
+}
+
+/* =========================================
+   HANDY-DESIGN – NUR EIN ABSCHNITT
    ========================================= */
 
 @media (max-width: 600px) {
-
-  /* Weniger Außenrand: mehr Platz für das Spiel. */
   body {
     padding: 8px 6px;
   }
 
-  #spielseite {
-    width: 100%;
+  #spielseite,
+  #memoryseite {
     padding: 12px 10px;
     border-radius: 18px;
   }
 
-  /* Kompakter Kopfbereich. */
   .spielnavigation {
     gap: 6px;
-  }
-
-  .levelauswahl {
-    font-size: 11px;
   }
 
   .spielkopf {
@@ -479,7 +836,7 @@ button:focus-visible {
 
   .spielkopf h1 {
     margin: 4px 0 6px;
-    font-size: 32px;
+    font-size: 30px;
   }
 
   .spielkopf p:last-child {
@@ -488,7 +845,17 @@ button:focus-visible {
     line-height: 1.4;
   }
 
-  /* Alle fünf Gäste bleiben nebeneinander. */
+  .knopf {
+    min-height: 44px;
+    padding: 10px 8px;
+    font-size: 13px;
+    line-height: 1.3;
+  }
+
+  .levelauswahl {
+    font-size: 12px;
+  }
+
   #katzenliste {
     gap: 5px;
     margin-bottom: 12px;
@@ -503,28 +870,9 @@ button:focus-visible {
     margin-bottom: 6px;
   }
 
-  #katzenliste .katzenname {
-    font-size: 11px;
-    line-height: 1.3;
-    overflow-wrap: anywhere;
-  }
-
-  /* Regeln bleiben aufklappbar. */
   .regeln {
     margin-bottom: 12px;
     padding: 10px;
-  }
-
-  .regeln summary {
-    line-height: 1.5;
-  }
-
-  /* Schaltflächen bleiben gut antippbar. */
-  #spielseite .knopf {
-    min-height: 44px;
-    padding: 10px 8px;
-    font-size: 13px;
-    line-height: 1.3;
   }
 
   .werkzeuge,
@@ -532,13 +880,6 @@ button:focus-visible {
     gap: 6px;
   }
 
-  .bedienhinweis {
-    margin: 8px 0 10px;
-    font-size: 12px;
-    line-height: 1.4;
-  }
-
-  /* Schmalerer Holzrahmen, größere Spielfläche. */
   .brettumrandung {
     padding: 5px;
     border-radius: 13px;
@@ -548,11 +889,10 @@ button:focus-visible {
     gap: 3px;
   }
 
-  #spielfeld .feld {
+  .feld {
     border-radius: 6px;
   }
 
-  /* Kompakter Abschluss unter dem Spielfeld. */
   .spielstatus {
     margin: 12px 0 10px;
   }
@@ -561,19 +901,13 @@ button:focus-visible {
     font-size: 14px;
   }
 
-  .kleinerhinweis {
-    font-size: 11px;
-  }
-
   .meldung {
     min-height: 0;
     margin-top: 10px;
     padding: 12px;
     font-size: 13px;
-    line-height: 1.4;
   }
 
-  /* Auch die Hofüberschrift bekommt kleinere Abstände. */
   .startkopf {
     padding: 6px 8px 12px;
   }
@@ -582,223 +916,35 @@ button:focus-visible {
     font-size: 28px;
   }
 
-  .startkopf p:last-child {
-    font-size: 13px;
+  /* Der Raum wird um das mittlere Regal herum vergrößert.
+     Die Spielpositionen wandern gemeinsam mit dem Bild. */
+  .eingangsszene {
+    aspect-ratio: 4 / 5;
+    border-radius: 18px;
   }
+
+  .regalraum {
+    left: -80%;
+    width: 222.5%;
+  }
+
+  .regalschild strong {
+    font-size: 16px;
+  }
+
+  .regalschild small {
+    font-size: 10px;
+  }
+
+  .memoryfeld {
+    gap: 7px;
+  }
+
+  .memorykarte {
+    border-radius: 12px;
+  }
+
+.memory-abschluss h2 {
+  font-size: 18px;
 }
-  
-  /* Das Gartentor selbst ist der einzige Spieleingang. */
-.gartenpforte {
-  position: absolute;
-  left: 30%;
-  top: 74%;
-  width: 25%;
-  height: 26%;
-
-  margin: 0;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-
-  background: transparent;
-  box-shadow: none;
-  cursor: pointer;
-
-  /* Die Klickfläche folgt ungefähr der Form des Holztores. */
-  clip-path: polygon(
-    0% 17%,
-    15% 7%,
-    35% 1%,
-    50% 0%,
-    70% 5%,
-    88% 14%,
-    100% 24%,
-    100% 100%,
-    0% 100%
-  );
-}
-
-/* Beim Darüberfahren bleibt das Originalbild unverändert. */
-.gartenpforte:hover,
-.gartenpforte:active {
-  background: transparent;
-  box-shadow: none;
-}
-
-/* Halbtransparentes Play-Symbol direkt auf dem Gartentor. */
-.gartenpforte::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 50%;
-
-  width: 0;
-  height: 0;
-
-  border-top: 18px solid transparent;
-  border-bottom: 18px solid transparent;
-  border-left: 28px solid rgba(255, 250, 240, 0.7);
-
-  transform: translate(-40%, -50%);
-  filter: drop-shadow(0 2px 3px rgba(60, 35, 15, 0.3));
-
-  /* Klicks gehen weiterhin an das Gartentor. */
-  pointer-events: none;
-}
-
-/* Bei Maus- oder Tastaturbedienung wird das Symbol heller. */
-.gartenpforte:hover::after,
-.gartenpforte:focus-visible::after {
-  border-left-color: rgba(255, 250, 240, 0.95);
-}
-
-/* Nur bei Tastaturbedienung zeigen wir die Klickfläche an. */
-.gartenpforte:focus-visible {
-  outline: none;
-  background: #fff3b833;
-  box-shadow: inset 0 0 0 4px #fff3b8;
-}
-
-/* Gästeübersicht: Bild und Name bekommen getrennten Platz. */
-.katzenkarte {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  padding: 8px 5px 13px;
-}
-
-.katzenkarte .katzenbild {
-  flex: 0 0 auto;
-
-  width: 100%;
-  height: auto;
-  aspect-ratio: 1;
-
-  margin-bottom: 7px;
-}
-
-.katzenname {
-  display: block;
-  width: 100%;
-  margin: 0;
-
-  font-size: 11px;
-  line-height: 1.3;
-}
-
-/* Darstellung der neuen Einzelbilder. */
-.katzenbild img {
-  display: block;
-
-  width: 100%;
-  height: 100%;
-  min-width: 0;
-  min-height: 0;
-
-  object-fit: contain;
-}
-
-/* =========================================
-   KORREKTUR: Katzen bleiben in ihren Feldern
-   ========================================= */
-
-/* Gästeübersicht: fünf gleich breite Karten. */
-#katzenliste {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 6px;
-}
-
-/* Platz für Bild, Namen und Abstand zum unteren Rand. */
-#katzenliste .katzenkarte {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  min-width: 0;
-  padding: 8px 5px 13px;
-  overflow: hidden;
-}
-
-/* Die Bildfläche erhält ihre Größe unabhängig vom Bild. */
-#spielseite .katzenbild {
-  position: relative;
-  display: block;
-
-  min-width: 0;
-  min-height: 0;
-  overflow: hidden;
-}
-
-/* Quadratische Bildfläche oberhalb des Katzennamens. */
-#katzenliste .katzenbild {
-  flex: 0 0 auto;
-
-  width: 100%;
-  height: auto;
-  aspect-ratio: 1;
-
-  margin: 0 0 7px;
-}
-
-/* Das Bild liegt vollständig innerhalb seiner Bildfläche. */
-#spielseite .katzenbild > img {
-  position: absolute;
-  inset: 0;
-
-  display: block;
-  width: 100%;
-  height: 100%;
-  max-width: 100%;
-  max-height: 100%;
-  min-width: 0;
-  min-height: 0;
-
-  margin: 0;
-  object-fit: contain;
-  object-position: center;
-}
-
-/* Auch das Ersatzzeichen bleibt in seiner Bildfläche. */
-#spielseite .katzenbild > .ersatzkatze {
-  position: absolute;
-  inset: 0;
-
-  display: grid;
-  place-items: center;
-  width: 100%;
-  height: 100%;
-}
-
-/* Katzen im Spielfeld bekommen ebenfalls feste Grenzen. */
-#spielfeld .feld {
-  position: relative;
-  min-width: 0;
-  overflow: hidden;
-}
-
-#spielfeld .feld .katzenbild {
-  position: absolute;
-  inset: 3%;
-
-  width: 94%;
-  height: 94%;
-  margin: 0;
-}
-
-/* Der Name bleibt unter dem Bild. */
-#katzenliste .katzenname {
-  flex: 0 0 auto;
-  width: 100%;
-  margin: 0;
-
-  font-size: 11px;
-  line-height: 1.3;
-  text-align: center;
-}
-
-/* Versteckte Bilder und Ersatzzeichen bleiben verborgen. */
-#spielseite .katzenbild > [hidden] {
-  display: none !important;
 }

@@ -5,18 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#667b58">
 
-  <title>Pfotenpause – Deine Katzenpension</title>
+  <title>Katzenpension – Kleine Pfoten, großes Glück</title>
 
   <link rel="stylesheet" href="style.css">
-  <script src="game.js" defer></script>
+  <script src="pfotenpause.js" defer></script>
+  <script src="memory.js" defer></script>
 </head>
 
 <body>
   <main class="app">
 
-    <!-- STARTSEITE -->
+    <!-- 1. HOF -->
     <section id="startseite" aria-labelledby="starttitel">
-
       <header class="startkopf">
         <p class="untertitel">
           Ein kleiner Hof. Fünf große Persönlichkeiten.
@@ -25,14 +25,13 @@
         <h1 id="starttitel" tabindex="-1">
           Willkommen in der Katzenpension
         </h1>
-
       </header>
 
       <div class="hofszene">
         <img
           id="hofbild"
           src="bilder/hof.png"
-          alt="Ein gemütlicher Katzenhof mit Haus, Garten und Holzpforte."
+          alt="Ein gemütlicher Katzenhof mit Haus und Gartenpforte."
           width="768"
           height="768"
         >
@@ -47,41 +46,98 @@
           id="gartenpforte"
           class="gartenpforte"
           type="button"
-          aria-label="Gartenpforte öffnen und Pfotenpause spielen"
-		  title="Pension betreten"
+          aria-label="Gartentor öffnen und die Pension betreten"
+          title="Pension betreten"
         ></button>
       </div>
-
-    
     </section>
 
-    <!-- SPIELSEITE -->
+    <!-- 2. EINGANG UND SPIELAUSWAHL -->
     <section
-      id="spielseite"
-      aria-labelledby="spieltitel"
+      id="eingangsseite"
+      aria-labelledby="eingangstitel"
       hidden
     >
+      <nav class="spielnavigation" aria-label="Navigation">
+        <button id="eingangZumHof" class="knopf dezent" type="button">
+          ← Zum Hof
+        </button>
+      </nav>
 
+      <header class="spielkopf">
+        <p class="untertitel">Kleine Pfoten, großes Glück</p>
+        <h1 id="eingangstitel" tabindex="-1">Was spielen wir heute?</h1>
+        <p>Wähle ein Spiel aus dem Regal.</p>
+      </header>
+
+      <div class="eingangsszene">
+        <div class="regalraum">
+          <img
+            id="eingangsbild"
+            class="eingangsbild"
+            src="bilder/eingang.png"
+            alt="Der gemütliche Empfang der Katzenpension mit einem Holzregal."
+          >
+
+          <button
+            id="startPfotenpause"
+            class="regalspiel regalspiel-pfoten"
+            type="button"
+            aria-label="Pfotenpause spielen"
+          >
+            <span class="regal-vorschau" aria-hidden="true">
+              <img src="bilder/katzen/mila-schlafen.png" alt="">
+            </span>
+
+            <span class="regalschild">
+              <strong>Pfotenpause</strong>
+              <small>Friedliche Schlafplätze finden</small>
+            </span>
+          </button>
+
+          <button
+            id="startMemory"
+            class="regalspiel regalspiel-memory"
+            type="button"
+            aria-label="Gutenachtgeschichte spielen"
+          >
+            <span class="regal-vorschau kartenstapel" aria-hidden="true">
+              <img src="bilder/memory/kratzbaum.png" alt="">
+              <img src="bilder/memory/koerbchen.png" alt="">
+            </span>
+
+            <span class="regalschild">
+              <strong>Gutenachtgeschichte</strong>
+              <small>Paare finden und den Tag entdecken</small>
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <p id="eingangBildhinweis" class="bildhinweis" hidden>
+        Das Eingangsbild fehlt. Prüfe die Datei bilder/eingang.png.
+        Die Spiele kannst du trotzdem auswählen.
+      </p>
+    </section>
+
+    <!-- 3. PFOTENPAUSE -->
+    <section id="spielseite" aria-labelledby="spieltitel" hidden>
       <nav class="spielnavigation" aria-label="Spielnavigation">
         <button id="zumHof" class="knopf dezent" type="button">
-          ← Zurück zum Hof
+          ← Spielauswahl
         </button>
 
         <select
-		 id="levelauswahl"
-		 class="levelauswahl"
-		 aria-label="Schlafplan auswählen"
-		></select>
+          id="levelauswahl"
+          class="levelauswahl"
+          aria-label="Tag auswählen"
+        ></select>
       </nav>
 
       <header class="spielkopf">
         <p class="untertitel">Die Abendruhe beginnt</p>
-
         <h1 id="spieltitel" tabindex="-1">Pfotenpause</h1>
-
-        <p>
-          Finde für jeden Gast einen friedlichen Schlafplatz.
-        </p>
+        <p>Finde für jeden Gast einen friedlichen Schlafplatz.</p>
       </header>
 
       <div
@@ -91,18 +147,16 @@
       ></div>
 
       <details class="regeln">
-        <summary>Wie funktioniert der Schlafplan?</summary>
-
+        <summary>Wie wird gespielt?</summary>
         <ol>
           <li>Genau eine Katze pro Reihe und Spalte.</li>
           <li>Genau eine Katze pro farbigem Bereich.</li>
           <li>Katzen dürfen sich nicht berühren, auch nicht diagonal.</li>
         </ol>
-
         <p>
           Jeder Bereich gehört zu einer bestimmten Katze.
           Ein × ist nur deine Denkstütze.
-		  Erneutes Antippen entfernt die gleiche Markierung.
+          Erneutes Antippen entfernt die gleiche Markierung.
         </p>
       </details>
 
@@ -125,8 +179,6 @@
           × Feld ausschließen
         </button>
       </div>
-	  
-	  <p></p>
 
       <div class="brettumrandung">
         <div
@@ -156,17 +208,122 @@
         Die Katzen warten auf ihre Schlafplätze.
       </p>
 
+      <p id="bildhinweis" class="bildhinweis" role="status" hidden></p>
+    </section>
+
+    <!-- 4. GUTENACHTGESCHICHTE -->
+    <section id="memoryseite" aria-labelledby="memorytitel" hidden>
+      <nav class="spielnavigation" aria-label="Spielnavigation">
+        <button id="memoryZumEingang" class="knopf dezent" type="button">
+          ← Spielauswahl
+        </button>
+
+        <span class="buchmarke">Unser Tagesalbum</span>
+      </nav>
+
+      <header class="spielkopf">
+        <p class="untertitel">Ein Tag voller kleiner Abenteuer</p>
+        <h1 id="memorytitel" tabindex="-1">Gutenachtgeschichte</h1>
+        <p>Finde die Paare und entdecke, was heute passiert ist.</p>
+      </header>
+
+	  <details class="regeln">
+		<summary>Wie wird gespielt?</summary>
+
+	   <ol>
+		<li>Decke nacheinander zwei Karten auf.</li>
+		<li>Gleiche Bilder bleiben sichtbar. Unterschiedliche drehen sich wieder um.</li>
+		<li>Jedes gefundene Paar erzählt ein kleines Abenteuer des Tages.</li>
+	   </ol>
+
+	   <p>
+		Lies die Geschichte und schließe das Fenster, um weiterzuspielen.
+		Es gibt kein Zeitlimit.
+	   </p>
+	  </details>
+
+      <div class="memory-status">
+        <span id="memoryPaare">Paare: 0 von 6</span>
+        <span id="memoryVersuche">Versuche: 0</span>
+      </div>
+
+      <div
+        id="memoryfeld"
+        class="memoryfeld"
+        aria-label="Memory mit zwölf Karten"
+      ></div>
+
+ <!-- Dieses Fenster erscheint nur nach einem gefundenen Paar. -->
+<dialog
+  id="geschichteDialog"
+  class="geschichte-dialog"
+  aria-labelledby="geschichteTitel"
+  aria-describedby="geschichteText"
+>
+  <form method="dialog" class="geschichte-form">
+
+    <button
+      class="geschichte-schliessen"
+      type="submit"
+      aria-label="Geschichte schließen"
+	  autofocus
+    >
+      ×
+    </button>
+
+    <p class="geschichte-kicker">🐾 Ein Abenteuer aus unserer Pension</p>
+
+	<img
+	  id="geschichteBild"
+	  class="geschichte-motiv"
+	  alt=""
+	  hidden
+	>
+
+    <h2 id="geschichteTitel"></h2>
+    <p id="geschichteText"></p>
+
+  </form>
+</dialog>
+
+<dialog
+  id="memoryAbschluss"
+  class="memory-abschluss"
+  aria-labelledby="memoryAbschlussTitel"
+  aria-describedby="memoryAbschlussText"
+>
+  <h2 id="memoryAbschlussTitel">Was für ein Tag! 💤</h2>
+
+  <p id="memoryAbschlussText">
+    Jetzt ist es still im Hof. Mila, Mango, Loki, Coco und Nala
+    hatten einen aufregenden Tag und sind jetzt bereit,
+    von ihren Abenteuern zu träumen.
+  </p>
+
+  <button
+    id="memoryWeiter"
+    class="knopf primaer"
+    type="button"
+    autofocus
+  >
+    Zur Spielauswahl →
+  </button>
+</dialog>
+
+      <button id="memoryNeu" class="knopf memory-neustart" type="button">
+        Neu mischen ↻
+      </button>
+
       <p
-        id="bildhinweis"
+        id="memoryBildhinweis"
         class="bildhinweis"
         role="status"
         hidden
       ></p>
-
     </section>
 
     <noscript>
-      Für dieses Spiel muss JavaScript aktiviert sein.
+      Für die Spiele muss JavaScript aktiviert sein.
     </noscript>
 
   </main>
