@@ -8,8 +8,11 @@
   <title>Katzenpension – Kleine Pfoten, großes Glück</title>
 
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="maeusealarm.css">
+
   <script src="pfotenpause.js" defer></script>
   <script src="memory.js" defer></script>
+  <script src="maeusealarm.js" defer></script>
 </head>
 
 <body>
@@ -53,11 +56,7 @@
     </section>
 
     <!-- 2. EINGANG UND SPIELAUSWAHL -->
-    <section
-      id="eingangsseite"
-      aria-labelledby="eingangstitel"
-      hidden
-    >
+    <section id="eingangsseite" aria-labelledby="eingangstitel" hidden>
       <nav class="spielnavigation" aria-label="Navigation">
         <button id="eingangZumHof" class="knopf dezent" type="button">
           ← Zum Hof
@@ -83,15 +82,24 @@
             id="startPfotenpause"
             class="regalspiel regalspiel-pfoten"
             type="button"
-            aria-label="Pfotenpause spielen"
+            aria-label="Pfotenpause spielen – friedliche Schlafplätze finden"
           >
             <span class="regal-vorschau" aria-hidden="true">
-              <img src="bilder/katzen/mila-schlafen.png" alt="">
+              <img
+                src="bilder/pfotenpause-vorschau.png"
+                alt=""
+                draggable="false"
+              >
             </span>
 
             <span class="regalschild">
               <strong>Pfotenpause</strong>
-              <small>Friedliche Schlafplätze finden</small>
+            </span>
+
+            <span class="regal-play" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false">
+                <path d="M8 5 L19 12 L8 19 Z"></path>
+              </svg>
             </span>
           </button>
 
@@ -99,16 +107,61 @@
             id="startMemory"
             class="regalspiel regalspiel-memory"
             type="button"
-            aria-label="Gutenachtgeschichte spielen"
+            aria-label="Gutenachtgeschichte spielen – Memorypaare finden"
           >
             <span class="regal-vorschau kartenstapel" aria-hidden="true">
-              <img src="bilder/memory/kratzbaum.png" alt="">
-              <img src="bilder/memory/koerbchen.png" alt="">
+              <img
+                src="bilder/memory/kratzbaum.png"
+                alt=""
+                draggable="false"
+              >
+              <img
+                src="bilder/memory/koerbchen.png"
+                alt=""
+                draggable="false"
+              >
             </span>
 
             <span class="regalschild">
-              <strong>Gutenachtgeschichte</strong>
-              <small>Paare finden und den Tag entdecken</small>
+              <strong>Gutenacht<wbr>geschichte</strong>
+            </span>
+
+            <span class="regal-play" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false">
+                <path d="M8 5 L19 12 L8 19 Z"></path>
+              </svg>
+            </span>
+          </button>
+
+          <button
+            id="startMaeusealarm"
+            class="regalspiel regalspiel-maeuse"
+            type="button"
+            aria-label="Mäusealarm spielen – Mäuse sammeln und Katzen in Ruhe lassen"
+          >
+            <span class="regal-vorschau" aria-hidden="true">
+              <img
+                id="maRegalBild"
+                src="bilder/mäusejagd/maeusealarm-vorschau.png"
+                alt=""
+                draggable="false"
+              >
+
+              <span
+                id="maRegalErsatz"
+                class="ma-regalersatz"
+                hidden
+              >🐭</span>
+            </span>
+
+            <span class="regalschild">
+              <strong>Mäusealarm</strong>
+            </span>
+
+            <span class="regal-play" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false">
+                <path d="M8 5 L19 12 L8 19 Z"></path>
+              </svg>
             </span>
           </button>
         </div>
@@ -227,88 +280,66 @@
         <p>Finde die Paare und entdecke, was heute passiert ist.</p>
       </header>
 
-	  <details class="regeln">
-		<summary>Wie wird gespielt?</summary>
+      <details class="regeln">
+        <summary>Wie wird gespielt?</summary>
+        <ol>
+          <li>Decke nacheinander zwei Karten auf.</li>
+          <li>
+            Gleiche Bilder bleiben sichtbar.
+            Unterschiedliche drehen sich wieder um.
+          </li>
+          <li>
+            Jedes gefundene Paar erzählt ein kleines Abenteuer des Tages.
+          </li>
+        </ol>
+        <p>
+          Lies die Geschichte und schließe das Fenster, um weiterzuspielen.
+          Es gibt kein Zeitlimit.
+        </p>
+      </details>
 
-	   <ol>
-		<li>Decke nacheinander zwei Karten auf.</li>
-		<li>Gleiche Bilder bleiben sichtbar. Unterschiedliche drehen sich wieder um.</li>
-		<li>Jedes gefundene Paar erzählt ein kleines Abenteuer des Tages.</li>
-	   </ol>
-
-	   <p>
-		Lies die Geschichte und schließe das Fenster, um weiterzuspielen.
-		Es gibt kein Zeitlimit.
-	   </p>
-	  </details>
+      <div class="brettumrandung">
+        <div
+          id="memoryfeld"
+          class="memoryfeld"
+          aria-label="Memory mit zwölf Karten"
+        ></div>
+      </div>
 
       <div class="memory-status">
         <span id="memoryPaare">Paare: 0 von 6</span>
         <span id="memoryVersuche">Versuche: 0</span>
       </div>
 
-      <div
-        id="memoryfeld"
-        class="memoryfeld"
-        aria-label="Memory mit zwölf Karten"
-      ></div>
+      <dialog
+        id="geschichteDialog"
+        class="geschichte-dialog"
+        aria-labelledby="geschichteTitel"
+        aria-describedby="geschichteText"
+      >
+        <form method="dialog" class="geschichte-form">
+          <button
+            class="geschichte-schliessen"
+            type="submit"
+            aria-label="Geschichte schließen"
+            autofocus
+          >×</button>
 
- <!-- Dieses Fenster erscheint nur nach einem gefundenen Paar. -->
-<dialog
-  id="geschichteDialog"
-  class="geschichte-dialog"
-  aria-labelledby="geschichteTitel"
-  aria-describedby="geschichteText"
->
-  <form method="dialog" class="geschichte-form">
+          <p class="geschichte-kicker">
+            🐾 Ein Abenteuer aus unserer Pension
+          </p>
 
-    <button
-      class="geschichte-schliessen"
-      type="submit"
-      aria-label="Geschichte schließen"
-	  autofocus
-    >
-      ×
-    </button>
+          <img
+            id="geschichteBild"
+            class="geschichte-motiv"
+            alt=""
+            hidden
+          >
 
-    <p class="geschichte-kicker">🐾 Ein Abenteuer aus unserer Pension</p>
-
-	<img
-	  id="geschichteBild"
-	  class="geschichte-motiv"
-	  alt=""
-	  hidden
-	>
-
-    <h2 id="geschichteTitel"></h2>
-    <p id="geschichteText"></p>
-
-  </form>
-</dialog>
-
-<dialog
-  id="memoryAbschluss"
-  class="memory-abschluss"
-  aria-labelledby="memoryAbschlussTitel"
-  aria-describedby="memoryAbschlussText"
->
-  <h2 id="memoryAbschlussTitel">Was für ein Tag! 💤</h2>
-
-  <p id="memoryAbschlussText">
-    Jetzt ist es still im Hof. Mila, Mango, Loki, Coco und Nala
-    hatten einen aufregenden Tag und sind jetzt bereit,
-    von ihren Abenteuern zu träumen.
-  </p>
-
-  <button
-    id="memoryWeiter"
-    class="knopf primaer"
-    type="button"
-    autofocus
-  >
-    Zur Spielauswahl →
-  </button>
-</dialog>
+          <h2 id="geschichteTitel"></h2>
+          <p id="geschichteText"></p>
+        </form>
+      </dialog>
 
       <button id="memoryNeu" class="knopf memory-neustart" type="button">
         Neu mischen ↻
@@ -321,6 +352,190 @@
         hidden
       ></p>
     </section>
+
+    <!-- 5. MÄUSEALARM: NEUER AUFBAU -->
+    <section
+      id="maeuseseite"
+      class="ma-seite"
+      aria-labelledby="maeusetitel"
+      hidden
+    >
+      <nav class="spielnavigation" aria-label="Spielnavigation">
+        <button id="maZurAuswahl" class="knopf dezent" type="button">
+          ← Spielauswahl
+        </button>
+
+        <select
+          id="maTagAuswahl"
+          class="levelauswahl"
+          aria-label="Tag auswählen"
+        ></select>
+      </nav>
+
+      <header class="spielkopf">
+        <p class="untertitel">Spielzeugmäuse auf Entdeckungstour</p>
+        <h1 id="maeusetitel" tabindex="-1">Mäusealarm</h1>
+        <p>Fange die Mäuse. Lass die Katzen in Ruhe.</p>
+      </header>
+	  
+	  <details class="regeln">
+        <summary>Wie wird gespielt?</summary>
+        <p>
+          Eine gefangene Spielzeugmaus bringt einen Punkt.
+          Eine angetippte Katze kostet einen Punkt.
+          Dein Punktestand fällt nicht unter null.
+        </p>
+        <p>
+          Erreiche das Tagesziel, bevor die Zeit abläuft.
+          Verschwundene Mäuse kosten keine Punkte.
+          Mit „Pause“ kannst du das Spiel unterbrechen.
+        </p>
+      </details>
+
+      <div class="ma-bedienung">
+        <div class="ma-anzeigen">
+          <p>
+            <span>Punkte</span>
+            <strong id="maPunkte">0 / 8</strong>
+          </p>
+
+          <p>
+            <span>Zeit</span>
+            <strong id="maZeit" role="timer">45 s</strong>
+          </p>
+        </div>
+
+        <div class="ma-aktionen">
+          <button
+            id="maStart"
+            class="knopf primaer"
+            type="button"
+            disabled
+          >
+            Bilder werden geladen …
+          </button>
+
+          <button
+            id="maPause"
+            class="knopf"
+            type="button"
+            aria-pressed="false"
+            disabled
+          >
+            Pause
+          </button>
+        </div>
+      </div>
+
+      <p id="maMeldung" class="ma-meldung" role="status">
+        Die Bilder werden vorbereitet.
+      </p>
+
+      <p
+        id="maBildhinweis"
+        class="bildhinweis"
+        role="status"
+        hidden
+      ></p>
+
+      <div id="maZimmer" class="ma-zimmer">
+        <!-- Dieses Bild wird vom JavaScript nicht ausgeblendet. -->
+        <img
+          id="maHintergrund"
+          class="ma-hintergrund"
+          src="bilder/mäusejagd/spielzimmer-handy.png"
+          alt="Eine gemütliche Katzenstube mit vielen Versteckmöglichkeiten."
+          width="768"
+          height="1152"
+          draggable="false"
+        >
+
+        <div
+          id="maVerstecke"
+          class="ma-verstecke"
+          role="group"
+          aria-label="Sechs Verstecke für Mäuse und Katzen"
+        ></div>
+      </div>
+
+
+      <details class="regeln ma-regeln">
+        <summary>Bildpositionen prüfen</summary>
+
+        <p>
+          In diesem Modus läuft keine Zeit.
+          Die vier Öffnungen werden markiert und die Tiere bleiben sichtbar.
+        </p>
+
+        <label class="ma-prueflabel" for="maPruefmodus">
+          Vorschau auswählen
+        </label>
+
+        <select id="maPruefmodus" class="ma-pruefauswahl" disabled>
+          <option value="aus">Prüfmodus aus</option>
+          <option value="maus">Mäuse in allen Öffnungen</option>
+          <option value="katze">Katzen in den erlaubten Öffnungen</option>
+        </select>
+      </details>
+    </section>
+
+    <!-- EIGENES ABSCHLUSSFENSTER FÜR MÄUSEALARM -->
+    <dialog
+      id="maAbschluss"
+      class="spiel-abschluss"
+      aria-labelledby="maAbschlussTitel"
+      aria-describedby="maAbschlussText"
+    >
+      <img id="maAbschlussBild" class="ma-abschlussbild" alt="" hidden>
+
+      <h2 id="maAbschlussTitel"></h2>
+      <p id="maAbschlussText"></p>
+
+      <div class="abschluss-aktionen">
+        <button
+          id="maWeiter"
+          class="knopf primaer"
+          type="button"
+          autofocus
+        >
+          Weiter →
+        </button>
+
+        <button id="maAbschlussAuswahl" class="knopf" type="button">
+          Zurück zur Spielauswahl
+        </button>
+      </div>
+    </dialog>
+
+    <!-- BISHERIGES ABSCHLUSSFENSTER FÜR PFOTENPAUSE UND MEMORY -->
+    <dialog
+      id="spielAbschluss"
+      class="spiel-abschluss"
+      aria-labelledby="spielAbschlussTitel"
+      aria-describedby="spielAbschlussText"
+    >
+      <h2 id="spielAbschlussTitel"></h2>
+      <p id="spielAbschlussText"></p>
+
+      <div class="abschluss-aktionen">
+        <button
+          id="spielAbschlussWeiter"
+          class="knopf primaer"
+          type="button"
+          autofocus
+        >
+          Weiter →
+        </button>
+
+        <button
+          id="spielAbschlussAuswahl"
+          class="knopf"
+          type="button"
+        >
+          Zurück zur Spielauswahl
+        </button>
+      </div>
+    </dialog>
 
     <noscript>
       Für die Spiele muss JavaScript aktiviert sein.

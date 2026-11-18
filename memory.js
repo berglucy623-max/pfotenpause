@@ -93,8 +93,6 @@
   const geschichteText = document.getElementById("geschichteText");
   const geschichteBild = document.getElementById("geschichteBild");
 
-  const abschluss = document.getElementById("memoryAbschluss");
-  const weiterKnopf = document.getElementById("memoryWeiter");
   const neuKnopf = document.getElementById("memoryNeu");
   const bildhinweis = document.getElementById("memoryBildhinweis");
 
@@ -280,23 +278,52 @@
     }, 1000);
   }
 
-  // ===================================================
+// ===================================================
   // 6. GESCHICHTENFENSTER UND ABSCHLUSS
   // ===================================================
 
-  function zeigeGeschichte(motiv) {
-    geschichteTitel.textContent = motiv.titel;
-    geschichteText.textContent = motiv.geschichte;
+  let geschichteTimer = null;
+  let ausstehendeGeschichte = null;
 
-    // Im Fenster erscheint nur das gefundene Kartenmotiv.
-    geschichteBild.hidden = true;
-    geschichteBild.src = geschichtenBilder[motiv.id];
-
-    document.body.classList.add("geschichte-offen");
-
-    if (!geschichteDialog.open) {
-      geschichteDialog.showModal();
+  function stoppeGeschichtenTimer() {
+    if (geschichteTimer !== null) {
+      window.clearTimeout(geschichteTimer);
+      geschichteTimer = null;
     }
+  }
+
+  function zeigeGeschichte(motiv) {
+    stoppeGeschichtenTimer();
+
+    // Während der Wartezeit keine weiteren Karten aufdecken.
+    ausstehendeGeschichte = motiv;
+    gesperrt = true;
+
+    geschichteTimer = window.setTimeout(function () {
+      geschichteTimer = null;
+
+      const memorySichtbar =
+        !document.getElementById("memoryseite").hidden;
+
+      // Außerhalb des Spiels kein Fenster öffnen.
+      // Die Geschichte bleibt für die Rückkehr gespeichert.
+      if (!memorySichtbar) {
+        return;
+      }
+
+      geschichteTitel.textContent = motiv.titel;
+      geschichteText.textContent = motiv.geschichte;
+
+      geschichteBild.hidden = true;
+      geschichteBild.src = geschichtenBilder[motiv.id];
+
+      if (!geschichteDialog.open) {
+        geschichteDialog.showModal();
+      }
+
+      ausstehendeGeschichte = null;
+      synchronisiereDialogStatus();
+    }, popupVerzoegerung);
   }
 
   geschichteBild.addEventListener("load", function () {
@@ -308,68 +335,104 @@
     meldeBildproblem(geschichteBild.getAttribute("src"));
   });
 
-	geschichteDialog.addEventListener("close", function () {
-	  document.body.classList.remove("geschichte-offen");
+  function zeigeMemoryAbschluss() {
+    // Die gemeinsame Funktion verzögert auch dieses Fenster.
+    zeigeSpielAbschluss({
+      titel: "Was für ein Tag! 💤",
 
-	  const allePaareGefunden = gefundenePaare === motive.length;
-	  const memorySichtbar =
-		!document.getElementById("memoryseite").hidden;
+      text:
+        `Du hast alle ${motive.length} Paare in ${versuche} ` +
+        "Versuchen gefunden. Mila, Mango, Loki, Coco und Nala " +
+        "sind jetzt bereit, von ihren Abenteuern zu träumen.",
 
-	  if (allePaareGefunden && memorySichtbar) {
-		// Nach der letzten Geschichte folgt der Abschluss.
-		document.body.classList.add("geschichte-offen");
+      weiterText: "Noch einmal spielen ↻",
 
-		if (!abschluss.open) {
-		  abschluss.showModal();
-		}
+      weiterAktion: function () {
+        neueRunde();
+        zeigeSeite("memoryseite");
+      }
+    });
+  }
 
-		return;
-	  }
+  geschichteDialog.addEventListener("close", function () {
+    // Ein veraltetes close-Ereignis nicht auf ein neu
+    // geöffnetes Geschichtenfenster anwenden.
+    if (geschichteDialog.open) {
+      return;
+    }
 
-	  // Während der Runde zur nächsten verfügbaren Karte zurückkehren.
-	  const naechsteKarte = karten.find(function (karte) {
-		return !karte.gefunden;
-	  });
+    gesperrt = false;
+    synchronisiereDialogStatus();
 
-	  const ziel = naechsteKarte
-		? naechsteKarte.knopf
-		: neuKnopf;
+    const memorySichtbar =
+      !document.getElementById("memoryseite").hidden;
 
-	  ziel.focus({ preventScroll: true });
-	});
-	
-	weiterKnopf.addEventListener("click", function () {
-	abschluss.close();
-	document.body.classList.remove("geschichte-offen");
+    if (!memorySichtbar) {
+      return;
+    }
 
-	// Die vorhandene Navigation aus game.js verwenden.
-	zeigeSeite("eingangsseite");
-	});
+    if (gefundenePaare === motive.length) {
+      // Nach der letzten Geschichte beginnt die Wartezeit
+      // für das Abschlussfenster.
+      zeigeMemoryAbschluss();
+      return;
+    }
 
-	// Dieses Abschlussfenster wird über seinen Button verlassen.
-	// Das Kreuz und die Esc-Taste der einzelnen Geschichten bleiben unverändert.
-	abschluss.addEventListener("cancel", function (ereignis) {
-	  ereignis.preventDefault();
-	});
+    const naechsteKarte = karten.find(function (karte) {
+      return !karte.gefunden;
+    });
 
-	function beendeRunde() {
-	  // Das Abschlussfenster noch nicht öffnen:
-	  // Zuerst darf die letzte Geschichte gelesen werden.
-	  neuKnopf.textContent = "Noch einmal spielen ↻";
-	}
+    const ziel = naechsteKarte
+      ? naechsteKarte.knopf
+      : neuKnopf;
+
+    ziel.focus({ preventScroll: true });
+  });
+
+  function beendeRunde() {
+    neuKnopf.textContent = "Noch einmal spielen ↻";
+  }
+
+  document.getElementById("startMemory").addEventListener(
+    "click",
+    function () {
+      // Eine noch nicht gelesene Geschichte hat Vorrang
+      // vor dem Abschlussfenster.
+      if (ausstehendeGeschichte !== null) {
+        zeigeGeschichte(ausstehendeGeschichte);
+        return;
+      }
+
+      if (gefundenePaare === motive.length) {
+        zeigeMemoryAbschluss();
+      }
+    }
+  );
+
+  document.getElementById("memoryZumEingang").addEventListener(
+    "click",
+    function () {
+      // Den Timer abbrechen, die ausstehende Geschichte
+      // aber für die Rückkehr behalten.
+      stoppeGeschichtenTimer();
+    }
+  );
 
   // ===================================================
   // 7. NEUE RUNDE
   // ===================================================
 
   function neueRunde() {
+    stoppeGeschichtenTimer();
+    ausstehendeGeschichte = null;
+
     if (geschichteDialog.open) {
       geschichteDialog.close();
     }
 
-    document.body.classList.remove("geschichte-offen");
+    // Bricht auch einen wartenden Abschluss ab.
+    schliesseSpielAbschluss();
 
-    // Alte Timer dürfen nicht in die neue Runde eingreifen.
     if (rueckdrehTimer !== null) {
       window.clearTimeout(rueckdrehTimer);
       rueckdrehTimer = null;
@@ -382,20 +445,16 @@
 
     const neueKarten = [];
 
-    // Jede Bilddatei ergibt zwei passende Karten.
     motive.forEach(function (motiv) {
       neueKarten.push({ motiv: motiv, gefunden: false });
       neueKarten.push({ motiv: motiv, gefunden: false });
     });
 
     karten = mische(neueKarten);
-
-    if (abschluss.open) {
-    abschluss.close();
-	}
     neuKnopf.textContent = "Neu mischen ↻";
 
     erstelleKarten();
+    synchronisiereDialogStatus();
   }
 
   neuKnopf.addEventListener("click", neueRunde);

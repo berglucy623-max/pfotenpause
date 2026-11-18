@@ -1,0 +1,315 @@
+/* =========================================
+   MÄUSEALARM: REGAL
+   ========================================= */
+
+.regalspiel-maeuse {
+  --regalboden: 65.8%;
+}
+
+.ma-regalersatz {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-items: end;
+  justify-items: center;
+  font-size: clamp(25px, 5vw, 50px);
+}
+
+/* =========================================
+   SPIELSEITE
+   ========================================= */
+
+.ma-seite {
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 16px;
+  border: 1px solid #e6dbc7;
+  border-radius: 24px;
+  color: var(--text);
+  background: var(--papier);
+  box-shadow: 0 12px 40px #49382d14;
+}
+
+.ma-seite .spielkopf {
+  margin: 10px 0 14px;
+}
+
+.ma-bedienung {
+  position: sticky;
+  top: 8px;
+  z-index: 10;
+  padding: 9px;
+  border: 1px solid #e4dac7;
+  border-radius: 14px;
+  background: #fffaf0f5;
+  box-shadow: 0 3px 12px #49382d15;
+}
+
+.ma-anzeigen,
+.ma-aktionen {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.ma-anzeigen {
+  margin-bottom: 8px;
+}
+
+.ma-anzeigen p {
+  margin: 0;
+  text-align: center;
+}
+
+.ma-anzeigen span {
+  display: block;
+  color: #847563;
+  font-size: 11px;
+}
+
+.ma-anzeigen strong {
+  display: block;
+  font-size: 19px;
+}
+
+.ma-aktionen .knopf {
+  width: 100%;
+}
+
+.ma-aktionen .knopf:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.ma-meldung {
+  min-height: 42px;
+  margin: 12px 0;
+  font-size: 13px;
+  text-align: center;
+}
+
+/* =========================================
+   HINTERGRUND
+   ========================================= */
+
+.ma-zimmer {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 15px;
+  background: #d9b37d;
+  box-shadow: 0 0 0 3px #805539;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Die natürliche Bildhöhe bestimmt die Höhe des gesamten Zimmers.
+   Es gibt keine zusätzliche Höhenbegrenzung und keinen Bildzuschnitt. */
+.ma-hintergrund {
+  display: block;
+  width: 100%;
+  height: auto;
+  pointer-events: none;
+}
+
+.ma-verstecke {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+/* =========================================
+   VERSTECKÖFFNUNGEN
+   ========================================= */
+
+.ma-versteck {
+  position: absolute;
+  left: var(--ma-links);
+  top: var(--ma-oben);
+  width: var(--ma-breite);
+  height: var(--ma-hoehe);
+
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+
+  appearance: none;
+  border: 0;
+  background: transparent;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Unsichtbare Tippfläche, unabhängig von der Größe der Figur. */
+.ma-versteck::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: max(100%, 44px);
+  height: max(100%, 44px);
+  transform: translate(-50%, -50%);
+  border-radius: 10px;
+}
+
+.ma-versteck:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+.ma-versteck:focus-visible {
+  outline: 3px solid #fff2c1;
+  outline-offset: 4px;
+}
+
+/* Nur in dieser Form darf eine Figur sichtbar sein.
+   Alles außerhalb bleibt vom ursprünglichen Zimmerbild bedeckt. */
+.ma-oeffnung {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  clip-path: var(--ma-form);
+  pointer-events: none;
+}
+
+.ma-auftauchen {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: translateY(110%);
+  transition:
+    transform 160ms ease-out,
+    opacity 100ms ease-out;
+  pointer-events: none;
+}
+
+.ma-versteck.ma-sichtbar .ma-auftauchen {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Breite steuert die Größe.
+   height: auto erhält die tatsächlichen Bildproportionen.
+   Der Bildmittelpunkt wird je nach Motiv auf das Gesicht ausgerichtet. */
+.ma-tierbild {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: block;
+  width: var(--ma-tierbreite, 110%);
+  max-width: none;
+  height: auto;
+  pointer-events: none;
+}
+
+/* =========================================
+   PRÜFMODUS
+   ========================================= */
+
+.ma-nummer {
+  display: none;
+}
+
+.ma-zimmer.ma-pruefen .ma-versteck {
+  outline: 2px solid #ffe37d;
+  background: #ffe37d22;
+}
+
+.ma-zimmer.ma-pruefen .ma-nummer {
+  position: absolute;
+  left: 0;
+  top: -25px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 23px;
+  height: 23px;
+  border-radius: 50%;
+  color: #49382d;
+  background: #ffe37d;
+  font-size: 12px;
+  font-weight: bold;
+  pointer-events: none;
+}
+
+.ma-zimmer.ma-pruefen .ma-auftauchen {
+  transition: none;
+}
+
+.ma-regeln {
+  margin: 16px 0 0;
+}
+
+.ma-prueflabel {
+  display: block;
+  margin: 12px 0 6px;
+  font-weight: bold;
+}
+
+.ma-pruefauswahl {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px;
+  border: 1px solid #d6c6ad;
+  border-radius: 9px;
+  color: var(--text);
+  background: var(--papier);
+  font: inherit;
+}
+
+/* =========================================
+   ABSCHLUSSFENSTER
+   ========================================= */
+
+.ma-abschlussbild {
+  display: block;
+  width: 150px;
+  height: 120px;
+  margin: 0 auto 14px;
+  object-fit: contain;
+}
+
+#maAbschluss.ma-nicht-geschafft {
+  background: #fff4db;
+}
+
+/* =========================================
+   HANDY
+   ========================================= */
+
+@media (max-width: 600px) {
+  .ma-seite {
+    padding: 10px 8px;
+    border-radius: 18px;
+  }
+
+  .ma-seite .spielkopf {
+    margin: 8px 0 12px;
+  }
+
+  .ma-seite .spielkopf h1 {
+    font-size: 29px;
+  }
+
+  .ma-bedienung {
+    top: 4px;
+    padding: 7px;
+  }
+
+  .ma-anzeigen strong {
+    font-size: 17px;
+  }
+
+  .ma-meldung {
+    font-size: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ma-auftauchen {
+    transition: none;
+  }
+}

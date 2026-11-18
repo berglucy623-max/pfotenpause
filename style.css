@@ -248,54 +248,79 @@ select:focus-visible {
   object-fit: cover;
 }
 
-/* Zwei zusammengehörige Spielboxen innerhalb der Regalfächer. */
+/* Die gesamte Spielgruppe ist anklickbar.
+   Sie hat keine eigene Hintergrundfläche. */
 .regalspiel {
+  --regalboden: 30.5%;
+  --spielhoehe: 13%;
+
   position: absolute;
   left: 37%;
+  top: calc(var(--regalboden) - var(--spielhoehe));
   width: 41%;
-  height: 11.5%;
+  height: var(--spielhoehe);
 
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
-  align-items: center;
-  gap: 8px;
+  grid-template-columns: 22% minmax(0, 1fr) 10%;
+  align-items: end;
+  column-gap: 2.5%;
 
-  padding: 4px 8px;
-  overflow: hidden;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
 
-  border: 2px solid #785033;
-  border-radius: 9px;
+  appearance: none;
+  border: 0;
+  border-radius: 6px;
   color: var(--text);
-  background: linear-gradient(135deg, #fff0d0, #e9c994);
-  box-shadow: 0 2px 3px #3d241e33;
+  background: transparent;
+  box-shadow: none;
+
+  text-align: left;
 }
 
-/* Abstand zur oberen und unteren Kante des jeweiligen Fachs. */
+/* Unterkante der Spielgruppe auf dem jeweiligen Regalbrett.
+   Diese Werte beziehen sich auf das gesamte Raumbild. */
 .regalspiel-pfoten {
-  top: 17.5%;
+  --regalboden: 30.5%;
 }
 
 .regalspiel-memory {
-  top: 36.5%;
-}
-
-.regalspiel:hover {
-  background: linear-gradient(135deg, #fff6e3, #f2d7aa);
+  --regalboden: 48.2%;
 }
 
 .regalspiel:focus-visible {
-  outline-color: #fff2c1;
-  outline-offset: 3px;
+  outline: 3px solid #fff2c1;
+  outline-offset: 5px;
 }
 
-/* Vorschau bleibt vollständig innerhalb der Spielbox. */
+/* Spielmotiv: unten auf dem Brett statt mittig in einer Box. */
 .regal-vorschau {
   position: relative;
+  display: block;
   width: 100%;
   height: 100%;
   min-width: 0;
   min-height: 0;
-  overflow: hidden;
+  overflow: visible;
+}
+
+/* Ein kleiner Kontaktschatten unmittelbar am Regalboden. */
+.regal-vorschau::after {
+  content: "";
+  position: absolute;
+  left: 4%;
+  bottom: -2px;
+  width: 92%;
+  height: 7%;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse,
+    rgba(55, 30, 15, 0.38),
+    transparent 72%
+  );
+  pointer-events: none;
 }
 
 .regal-vorschau > img {
@@ -304,62 +329,102 @@ select:focus-visible {
   display: block;
   width: 100%;
   height: 100%;
+
   object-fit: contain;
+  object-position: center bottom;
+
+  filter: drop-shadow(1px 2px 1px rgba(55, 30, 15, 0.25));
+  pointer-events: none;
+  user-select: none;
 }
 
-/* Zwei Memorykarten nebeneinander, ohne überstehende Drehung. */
+/* Kleinere, überlappende Memorykarten.
+   Die vordere Karte bleibt auf dem Regalboden stehen. */
 .kartenstapel > img {
-  top: 5%;
-  bottom: auto;
-  width: 54%;
-  height: 90%;
-  transform: none;
+  inset: auto;
+  bottom: 0;
+
+  width: 62%;
+  height: auto;
+  aspect-ratio: 1;
+
+  object-fit: contain;
+  object-position: center bottom;
+  transform-origin: center bottom;
 }
 
 .kartenstapel > img:first-child {
-  left: 0;
+  left: 10%;
+  bottom: 6%;
+  z-index: 1;
+  transform: rotate(-10deg);
 }
 
 .kartenstapel > img:last-child {
-  left: auto;
-  right: 0;
+  right: 8%;
+  z-index: 2;
+  transform: none;
 }
 
-/* Der Titel gehört zur Box, kein zusätzliches Holzschild. */
+/* Weißer Spielname direkt vor der Regalwand.
+   Kein Holzschild und keine Hintergrundfläche. */
 .regalschild {
   position: relative;
+  display: block;
   min-width: 0;
-  padding: 0 18px 0 0;
+  margin: 0;
+  padding: 0 0 5px;
 
   border: 0;
+  border-radius: 0;
+  color: #fffaf0;
   background: transparent;
   box-shadow: none;
-  text-align: left;
+
+  text-align: center;
+  text-shadow:
+    0 2px 3px rgba(60, 35, 15, 0.7);
 }
 
 .regalschild strong {
   display: block;
   font-family: Georgia, serif;
-  font-size: clamp(12px, 1.8vw, 18px);
-  line-height: 1.2;
-  overflow-wrap: anywhere;
+  font-size: clamp(11px, 1.9vw, 20px);
+  font-weight: bold;
+  line-height: 1.15;
 }
 
-.regalschild small {
-  display: none;
+/* Play-Dreieck wie am Gartentor:
+   halbtransparent, ohne Kreis und ohne Hintergrund. */
+.regal-play {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 1;
+
+  border: 0;
+  border-radius: 0;
+  color: rgba(255, 250, 240, 0.7);
+  background: transparent;
+  box-shadow: none;
+
+  pointer-events: none;
 }
 
-.regalschild::after {
-  content: "";
-  position: absolute;
-  right: 2px;
-  top: 50%;
+.regal-play svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
 
-  border-top: 6px solid transparent;
-  border-bottom: 6px solid transparent;
-  border-left: 8px solid #805539;
+  filter:
+    drop-shadow(0 2px 3px rgba(60, 35, 15, 0.3));
+}
 
-  transform: translateY(-50%);
+/* Gleiche Hervorhebung wie beim Play-Dreieck am Gartentor. */
+.regalspiel:hover .regal-play,
+.regalspiel:focus-visible .regal-play {
+  color: rgba(255, 250, 240, 0.95);
 }
 
 /* =========================================
@@ -553,8 +618,13 @@ select:focus-visible {
   border-color: #587b40;
 }
 
-.spielstatus {
+.spielstatus,
+.memory-status {
   margin: 17px 0 12px;
+  padding: 10px 12px;
+  border: 1px solid #e4dac7;
+  border-radius: 12px;
+  background: #f5efdf;
   text-align: center;
 }
 
@@ -614,8 +684,8 @@ select:focus-visible {
 .memory-status {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: 8px;
-  margin-bottom: 12px;
   font-size: 13px;
   font-weight: bold;
 }
@@ -685,7 +755,7 @@ select:focus-visible {
 }
 
 /* Geschichtenfenster: warm, verspielt und etwas comicartig. */
-body.geschichte-offen {
+body.dialog-offen {
   overflow: hidden;
 }
 
@@ -710,7 +780,7 @@ body.geschichte-offen {
 
 /* Beide Fenster verwenden denselben abgedunkelten Hintergrund. */
 .geschichte-dialog::backdrop,
-.memory-abschluss::backdrop {
+.spiel-abschluss::backdrop {
   background: rgba(40, 28, 20, 0.55);
   backdrop-filter: blur(3px);
 }
@@ -770,8 +840,8 @@ body.geschichte-offen {
 }
 
 
-/* Abschluss als zentriertes Fenster – ohne Schließen-Kreuz. */
-.memory-abschluss {
+/* Ein gemeinsames Abschlussfenster für beide Spiele. */
+.spiel-abschluss {
   width: min(420px, calc(100% - 32px));
   max-height: calc(100dvh - 32px);
   margin: auto;
@@ -782,22 +852,32 @@ body.geschichte-offen {
   border-radius: 22px;
 
   color: var(--text);
-  background: #e0eed6;
+  background:
+    radial-gradient(circle at top, #eff5e8, transparent 75%),
+    #e0eed6;
+
   box-shadow: 7px 7px 0 #49382d55;
   text-align: center;
 }
 
-.memory-abschluss h2 {
+.spiel-abschluss h2 {
   margin: 0 0 14px;
+  font-size: 24px;
+  line-height: 1.2;
 }
 
-.memory-abschluss p {
+.spiel-abschluss p {
   margin: 0 0 22px;
   font-size: 15px;
   line-height: 1.6;
 }
 
-.memory-abschluss .knopf {
+.abschluss-aktionen {
+  display: grid;
+  gap: 10px;
+}
+
+.abschluss-aktionen .knopf {
   width: 100%;
 }
 
@@ -892,10 +972,12 @@ body.geschichte-offen {
   .feld {
     border-radius: 6px;
   }
-
-  .spielstatus {
-    margin: 12px 0 10px;
-  }
+  
+	.spielstatus,
+	.memory-status {
+	  margin: 12px 0 10px;
+	  padding: 9px 10px;
+	}
 
   #katzenzaehler {
     font-size: 14px;
@@ -928,13 +1010,13 @@ body.geschichte-offen {
     width: 222.5%;
   }
 
-  .regalschild strong {
-    font-size: 16px;
-  }
+  .regalschild {
+	padding: 0 0 4px;
+}
 
-  .regalschild small {
-    font-size: 10px;
-  }
+  .regalschild strong {
+	font-size: clamp(11px, 3.9vw, 18px);
+	}
 
   .memoryfeld {
     gap: 7px;
@@ -944,7 +1026,7 @@ body.geschichte-offen {
     border-radius: 12px;
   }
 
-.memory-abschluss h2 {
-  font-size: 18px;
-}
+	.spiel-abschluss h2 {
+	  font-size: 20px;
+	}
 }

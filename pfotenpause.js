@@ -219,6 +219,7 @@ const seitenTitel = {
 
 // Seitenwechsel verändert keine Spielstände.
 function zeigeSeite(seitenId) {
+	stoppeAbschlussTimer();
   if (!Object.prototype.hasOwnProperty.call(seitenTitel, seitenId)) {
     console.error("Unbekannte Seite:", seitenId);
     return;
@@ -232,6 +233,119 @@ function zeigeSeite(seitenId) {
   titel.focus({ preventScroll: true });
   window.scrollTo(0, 0);
 }
+
+// =====================================================
+// GEMEINSAMES ABSCHLUSSFENSTER
+// =====================================================
+
+const spielAbschluss = document.getElementById("spielAbschluss");
+const spielAbschlussTitel =
+  document.getElementById("spielAbschlussTitel");
+const spielAbschlussText =
+  document.getElementById("spielAbschlussText");
+const spielAbschlussWeiter =
+  document.getElementById("spielAbschlussWeiter");
+const spielAbschlussAuswahl =
+  document.getElementById("spielAbschlussAuswahl");
+
+// Gemeinsame Wartezeit für Geschichten und Abschlussfenster.
+const popupVerzoegerung = 2000;
+
+let abschlussWeiterAktion = null;
+let abschlussTimer = null;
+
+// Der Hintergrund bleibt gesperrt, solange irgendein Dialog offen ist.
+function synchronisiereDialogStatus() {
+  const dialogOffen =
+    document.querySelector("dialog[open]") !== null;
+
+  document.body.classList.toggle("dialog-offen", dialogOffen);
+}
+
+function stoppeAbschlussTimer() {
+  if (abschlussTimer !== null) {
+    window.clearTimeout(abschlussTimer);
+    abschlussTimer = null;
+  }
+}
+
+function schliesseSpielAbschluss() {
+  stoppeAbschlussTimer();
+
+  if (spielAbschluss.open) {
+    spielAbschluss.close();
+  }
+
+  abschlussWeiterAktion = null;
+  synchronisiereDialogStatus();
+}
+
+function zeigeSpielAbschluss({
+  titel,
+  text,
+  weiterText,
+  weiterAktion
+}) {
+  // Ein vorheriger Abschluss oder Timer wird zuerst beendet.
+  schliesseSpielAbschluss();
+
+  // Merken, auf welcher Seite der Abschluss ausgelöst wurde.
+  const seiteBeimStart = Object.keys(seitenTitel).find(
+    function (seitenId) {
+      return !document.getElementById(seitenId).hidden;
+    }
+  );
+
+  abschlussTimer = window.setTimeout(function () {
+    abschlussTimer = null;
+
+    // Nicht öffnen, falls die ursprüngliche Seite verlassen wurde.
+    if (
+      !seiteBeimStart ||
+      document.getElementById(seiteBeimStart).hidden
+    ) {
+      return;
+    }
+
+    spielAbschlussTitel.textContent = titel;
+    spielAbschlussText.textContent = text;
+    spielAbschlussWeiter.textContent = weiterText;
+    abschlussWeiterAktion = weiterAktion;
+
+    if (!spielAbschluss.open) {
+      spielAbschluss.showModal();
+    }
+
+    synchronisiereDialogStatus();
+    spielAbschlussWeiter.focus({ preventScroll: true });
+  }, popupVerzoegerung);
+}
+
+spielAbschlussWeiter.addEventListener("click", function () {
+  // Vor dem Schließen sichern, da die gespeicherte Aktion gelöscht wird.
+  const aktion = abschlussWeiterAktion;
+
+  schliesseSpielAbschluss();
+
+  if (typeof aktion === "function") {
+    aktion();
+  }
+});
+
+spielAbschlussAuswahl.addEventListener("click", function () {
+  schliesseSpielAbschluss();
+  zeigeSeite("eingangsseite");
+});
+
+// Der Abschluss wird über eine der beiden Schaltflächen verlassen.
+spielAbschluss.addEventListener("cancel", function (ereignis) {
+  ereignis.preventDefault();
+});
+
+spielAbschluss.addEventListener(
+  "close",
+  synchronisiereDialogStatus
+);
 
 document.getElementById("gartenpforte").addEventListener(
   "click",
@@ -251,6 +365,12 @@ document.getElementById("startPfotenpause").addEventListener(
   "click",
   function () {
     zeigeSeite("spielseite");
+
+    // Ein bereits gelöster Tag behält seinen Spielstand.
+    // Beim erneuten Öffnen sind die Abschlussaktionen wieder erreichbar.
+    if (geloest) {
+      zeigePfotenAbschluss();
+    }
   }
 );
 
@@ -486,21 +606,11 @@ function aktualisiereAnzeige() {
 
   aktualisiereKatzenliste();
 
-  // Der rechte Button passt sich dem Spielzustand an.
-  const weiterKnopf = document.getElementById("zuruecksetzen");
-  const weitererTagVorhanden =
-    aktuellesLevel + 1 < levelListe.length;
-
-  if (!geloest) {
-    weiterKnopf.textContent = "Neu versuchen";
-  } else if (weitererTagVorhanden) {
-    weiterKnopf.textContent = "Weiter →";
-  } else {
-   weiterKnopf.textContent = "Spielauswahl →";
   }
-}
+
 
 function klickeFeld(index) {
+	stoppeAbschlussTimer();
   if (zustand[index] === werkzeug) {
     zustand[index] = 0;
   } else {
@@ -551,7 +661,43 @@ function erstelleSpielfeld() {
 // 6. SPIELREGELN PRÜFEN
 // =====================================================
 
+function zeigePfotenAbschluss() {
+  if (!geloest) {
+    return;
+  }
+
+  const weitererTagVorhanden =
+    aktuellesLevel + 1 < levelListe.length;
+
+  const naechsterTag = weitererTagVorhanden
+    ? aktuellesLevel + 1
+    : 0;
+
+  const abschlussText =
+    "Mila, Mango, Loki, Coco und Nala haben ihre Schlafplätze " +
+    "gefunden. Jetzt kehrt Ruhe in die Pension ein." +
+    (
+      weitererTagVorhanden
+        ? " Morgen wartet ein neuer Schlafplan auf dich."
+        : " Das war der letzte verfügbare Tag."
+    );
+
+  zeigeSpielAbschluss({
+    titel: `${levelListe[aktuellesLevel].name} geschafft! 💤`,
+    text: abschlussText,
+    weiterText: weitererTagVorhanden
+      ? "Weiter →"
+      : "Tag 1 spielen ↻",
+
+    weiterAktion: function () {
+      wechsleLevel(naechsterTag);
+      zeigeSeite("spielseite");
+    }
+  });
+}
+
 function pruefeLoesung() {
+	stoppeAbschlussTimer();
   const platzierteKatzen = [];
   const gruende = new Set();
 
@@ -651,16 +797,19 @@ function pruefeLoesung() {
     return;
   }
 
-  geloest = true;
-  aktualisiereAnzeige();
+	 geloest = true;
+	  aktualisiereAnzeige();
 
-  zeigeMeldung(
-    "Pssst … alle schlafen! Die Abendruhe beginnt💤",
-    "erfolg"
-  );
+	  zeigeMeldung(
+		"Pssst … alle schlafen! Die Abendruhe beginnt. 💤",
+		"erfolg"
+	  );
+
+	  zeigePfotenAbschluss();
 }
 
 function setzeZurueck() {
+	stoppeAbschlussTimer();
   zustand.fill(0);
   konflikte.clear();
   geloest = false;
@@ -690,33 +839,11 @@ document.getElementById("pruefen").addEventListener(
   pruefeLoesung
 );
 
+// Dieser Button startet immer den aktuellen Tag neu.
+// Der Wechsel zum nächsten Tag erfolgt im Abschlussfenster.
 document.getElementById("zuruecksetzen").addEventListener(
   "click",
-  function () {
-    // Solange das Rätsel nicht gelöst ist:
-    // den aktuellen Tag erneut versuchen.
-    if (!geloest) {
-      setzeZurueck();
-      return;
-    }
-
-    const naechsterTag = aktuellesLevel + 1;
-
-    if (naechsterTag < levelListe.length) {
-      // Den nächsten Tag mit leerem Spielfeld öffnen.
-      wechsleLevel(naechsterTag);
-
-      // Auf dem Handy wieder zum Spielanfang springen.
-      document.getElementById("spieltitel").focus({
-        preventScroll: true
-      });
-
-      window.scrollTo(0, 0);
-    } else {
-	 // Alle vorhandenen Tage geschafft: zurück zur Spielauswahl.
-	 zeigeSeite("eingangsseite");
-	}
-  }
+  setzeZurueck
 );
 
 // =====================================================
@@ -724,6 +851,7 @@ document.getElementById("zuruecksetzen").addEventListener(
 // =====================================================
 
 function wechsleLevel(index) {
+	stoppeAbschlussTimer();
   // Nur vorhandene Level zulassen.
   if (
     !Number.isInteger(index) ||
@@ -773,7 +901,7 @@ function initialisiereLevelauswahl() {
     wechsleLevel(Number(auswahl.value));
   });
 
-  // Beim Öffnen das erste Level laden.
+  // Beim Start das erste Level laden.
   wechsleLevel(0);
 }
 
