@@ -118,10 +118,12 @@
   position: absolute;
   inset: 0;
   z-index: 1;
+  overflow: visible;
+  pointer-events: none;
 }
 
 /* =========================================
-   VERSTECKÖFFNUNGEN
+   KLICKBEREICHE
    ========================================= */
 
 .ma-versteck {
@@ -137,18 +139,27 @@
   padding: 0;
   overflow: visible;
 
+  /* Kein eigener Stapel:
+     Alle Tiere liegen gemeinsam hinter den Vorderseiten. */
+  z-index: auto;
+  isolation: auto;
+
   appearance: none;
   border: 0;
   background: transparent;
+  cursor: pointer;
+  pointer-events: auto;
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Unsichtbare Tippfläche, unabhängig von der Größe der Figur. */
+/* Unsichtbare Tippfläche.
+   Sie liegt über den Vorderseiten, bleibt aber durchsichtig. */
 .ma-versteck::before {
   content: "";
   position: absolute;
   left: 50%;
   top: 50%;
+  z-index: 4;
   width: max(100%, 44px);
   height: max(100%, 44px);
   transform: translate(-50%, -50%);
@@ -158,6 +169,7 @@
 .ma-versteck:disabled {
   cursor: default;
   opacity: 1;
+  pointer-events: none;
 }
 
 .ma-versteck:focus-visible {
@@ -165,35 +177,35 @@
   outline-offset: 4px;
 }
 
-/* Nur in dieser Form darf eine Figur sichtbar sein.
-   Alles außerhalb bleibt vom ursprünglichen Zimmerbild bedeckt. */
+/* =========================================
+   TIERE: KEIN ZUSCHNITT MEHR
+   ========================================= */
+
+/* Der Klassenname bleibt erhalten.
+   Dieser Bereich begrenzt das Tierbild aber nicht mehr. */
 .ma-oeffnung {
   position: absolute;
   inset: 0;
-  overflow: hidden;
-  clip-path: var(--ma-form);
+  z-index: 1;
+  overflow: visible;
   pointer-events: none;
 }
 
+/* Nur ein- und ausblenden.
+   Kein Verschieben nach unten, damit Tiere beim Verschwinden
+   nicht unter der Versteck-Vorderseite herausrutschen. */
 .ma-auftauchen {
   position: absolute;
   inset: 0;
   opacity: 0;
-  transform: translateY(110%);
-  transition:
-    transform 160ms ease-out,
-    opacity 100ms ease-out;
+  transition: opacity 120ms ease-out;
   pointer-events: none;
 }
 
 .ma-versteck.ma-sichtbar .ma-auftauchen {
   opacity: 1;
-  transform: translateY(0);
 }
 
-/* Breite steuert die Größe.
-   height: auto erhält die tatsächlichen Bildproportionen.
-   Der Bildmittelpunkt wird je nach Motiv auf das Gesicht ausgerichtet. */
 .ma-tierbild {
   position: absolute;
   left: 50%;
@@ -202,7 +214,37 @@
   width: var(--ma-tierbreite, 110%);
   max-width: none;
   height: auto;
+  max-height: none;
   pointer-events: none;
+}
+
+/* =========================================
+   VORDERSEITEN DER VERSTECKE
+   ========================================= */
+
+.ma-vorderseite {
+  position: absolute;
+  left: var(--ma-vorderlinks);
+  top: var(--ma-vorderoben);
+  z-index: 2;
+
+  display: block;
+  width: var(--ma-vorderbreite);
+  max-width: none;
+  height: auto;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Nicht geladene Vorderseiten bleiben ausgeblendet. */
+.ma-vorderseite[hidden] {
+  display: none;
 }
 
 /* =========================================
@@ -222,7 +264,7 @@
   position: absolute;
   left: 0;
   top: -25px;
-  z-index: 2;
+  z-index: 5;
   display: grid;
   place-items: center;
   width: 23px;

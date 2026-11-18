@@ -9,6 +9,88 @@
   // Entspricht dem Ordner auf deinem aktuellen Screenshot.
   const BILDORDNER = "bilder/mäusejagd/";
   const HINTERGRUND = "spielzimmer-handy.png";
+  // Ausschließlich diese Bilder für den erfolgreichen Tagesabschluss.
+	const ABSCHLUSSKATZEN = [
+	  { datei: "coco-maus.png", name: "Coco" },
+	  { datei: "loki-maus.png", name: "Loki" },
+	  { datei: "mango-maus.png", name: "Mango" },
+	  { datei: "mila-maus.png", name: "Mila" },
+	  { datei: "nala-maus.png", name: "Nala" }
+	];
+	
+/*
+ * Vorderseiten der Verstecke.
+ *
+ * versteck:
+ * Nummer des zugehörigen Verstecks im Prüfmodus.
+ *
+ * position:
+ * [links, oben, Breite] in Prozent des vollständigen Zimmerbildes.
+ * Die Höhe ergibt sich aus dem Seitenverhältnis der PNG.
+ *
+ * ACHTUNG:
+ * Die Positionswerte sind geschätzte Startwerte.
+ * Transparente Außenränder der PNG beeinflussen die Ausrichtung.
+ */
+const VORDERSEITEN = [
+  {
+    "versteck": 1,
+    "datei": "Holzhöhle links.png",
+    "position": [
+      0,
+      42.6,
+      31.4
+    ]
+  },
+  {
+    "versteck": 2,
+    "datei": "Papphöhle in der Mitte.png",
+    "position": [
+      34.4,
+      50.2,
+      21.5
+    ]
+  },
+  {
+    "versteck": 3,
+    "datei": "kleine Holzhöhle oben rechts.png",
+    "position": [
+      63.5,
+      24.5,
+      19
+    ]
+  },
+  {
+    "versteck": 4,
+    "weitereVerstecke": [
+      6
+    ],
+    "datei": "Kuscheltunnel und Karton rechts.png",
+    "position": [
+      78.6,
+      53.6,
+      21.5
+    ]
+  },
+  {
+    "versteck": 5,
+    "datei": "Karton vorne links.png",
+    "position": [
+      4.7,
+      53.6,
+      32
+    ]
+  },
+  {
+    "versteck": 7,
+    "datei": "blumentopf.png",
+    "position": [
+      0,
+      68.2,
+      17.3
+    ]
+  }
+];
 
   /*
    * fokusX / fokusY:
@@ -275,9 +357,15 @@ const VERSTECKE = [
 	  "mila-verstecken.png"
 	],
 
-  // Kleinerer Kopf als bei der bisherigen Einstellung.
-  katzenbreite: 140,
-  katzenOffsetY: -5,
+	katzenbreite: 140,
+
+	// Die sitzenden Katzen bleiben an ihrer bisherigen Stelle.
+	katzenOffsetY: -5,
+
+	// Nur die liegenden Katzen weiter nach unten setzen.
+	katzenOffsetYNachPose: {
+	  liegen: 20
+	},
 
   // Loki hier horizontal spiegeln.
   // Nala bleibt wie an Position 5 ungespiegelt.
@@ -380,6 +468,7 @@ const VERSTECKE = [
 
   let verfuegbareMaeuse = [];
   let verfuegbareKatzen = [];
+  let verfuegbareAbschlusskatzen = [];
   let bilderBereit = false;
 
   let tag = 1;
@@ -391,6 +480,7 @@ const VERSTECKE = [
   let status = "laden";
   let naechsterTag = 1;
   let letztesVersteck = null;
+  let maeuseInFolge = 0;
 
   function zufall(min, max) {
     return min + Math.random() * (max - min);
@@ -516,8 +606,7 @@ const VERSTECKE = [
     knopf.style.setProperty("--ma-oben", `${oben}%`);
     knopf.style.setProperty("--ma-breite", `${breite}%`);
     knopf.style.setProperty("--ma-hoehe", `${hoehe}%`);
-    knopf.style.setProperty("--ma-form", versteck.form);
-
+    
     knopf.setAttribute("aria-label", `${versteck.name}: leer`);
 
     const oeffnung = document.createElement("span");
@@ -563,42 +652,340 @@ const VERSTECKE = [
 
     plaetze.push(platz);
   });
-
-	function erlaubteMaeuse(platz) {
-	  // Fehlende oder ungültige Liste bedeutet:
-	  // In diesem Versteck sind keine Mäuse erlaubt.
-	  const erlaubteDateien = Array.isArray(
-		platz.versteck.mausdateien
-	  )
-		? platz.versteck.mausdateien
-		: [];
-
-	  return verfuegbareMaeuse.filter((maus) => {
-		return erlaubteDateien.includes(maus.datei);
-	  });
-	}
   
-	function erlaubteKatzen(platz) {
-	  const versteck = platz.versteck;
+/* =========================================
+   VORDERSEITEN ERSTELLEN
+   ========================================= */
 
-	  if (!versteck.katzenErlaubt) {
-		return [];
-	  }
+VORDERSEITEN.forEach((vorderseite) => {
+  const nummern = [
+    vorderseite.versteck,
+    ...(vorderseite.weitereVerstecke ?? [])
+  ];
 
-	  const erlaubtePosen = versteck.katzenposen ?? [
-		versteck.katzenpose ?? "liegen"
-	  ];
+  const zugeordnetePlaetze = nummern.map((nummer) => {
+    return plaetze[nummer - 1];
+  });
 
-	  const zusaetzlicheDateien =
-		versteck.zusaetzlicheKatzendateien ?? [];
+  if (zugeordnetePlaetze.some((platz) => !platz)) {
+    console.error(
+      "Mäusealarm: Vorderseite ohne gültiges Versteck.",
+      vorderseite
+    );
+    return;
+  }
 
-	  return verfuegbareKatzen.filter((katze) => {
-		const pose = katze.pose ?? "liegen";
+  // Auch bei mehreren zugeordneten Verstecken nur ein Bild erstellen.
+  const bild = document.createElement("img");
 
-		return erlaubtePosen.includes(pose) ||
-		  zusaetzlicheDateien.includes(katze.datei);
-	  });
-	}
+  bild.className = "ma-vorderseite";
+  bild.alt = "";
+  bild.draggable = false;
+  bild.hidden = true;
+  bild.setAttribute("aria-hidden", "true");
+
+  const [links, oben, breite] = vorderseite.position;
+
+  bild.style.setProperty("--ma-vorderlinks", `${links}%`);
+  bild.style.setProperty("--ma-vorderoben", `${oben}%`);
+  bild.style.setProperty("--ma-vorderbreite", `${breite}%`);
+
+  zugeordnetePlaetze.forEach((platz) => {
+    platz.vorderseiteBild = bild;
+    platz.vorderseiteDatei = vorderseite.datei;
+    platz.vorderseiteBereit = false;
+  });
+
+  ui.verstecke.append(bild);
+
+  bild.addEventListener("error", () => {
+    bild.hidden = true;
+
+    // Bei einem Bildfehler beide zugehörigen Verstecke deaktivieren.
+    zugeordnetePlaetze.forEach((platz) => {
+      platz.vorderseiteBereit = false;
+      entfernen(platz);
+    });
+
+    bildproblem(vorderseite.datei);
+    anzeigen();
+  });
+});
+
+
+/* =========================================
+   VORDERSEITEN MANUELL AUSRICHTEN
+   ========================================= */
+
+{
+  const editor = document.createElement("details");
+  editor.className = "regeln ma-regeln";
+
+  editor.innerHTML = `
+    <summary>Vorderseiten manuell ausrichten</summary>
+
+    <p>
+      Wähle ein Element und ändere seine Position oder Breite.
+      Alle Angaben beziehen sich auf das vollständige Zimmerbild.
+    </p>
+
+    <label class="ma-prueflabel" for="maElementAuswahl">
+      Element
+    </label>
+
+    <select
+      id="maElementAuswahl"
+      class="ma-pruefauswahl"
+    ></select>
+
+    <div
+      style="
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+        margin-top: 12px;
+      "
+    >
+      <label>
+        Links (%)
+        <input
+          id="maElementLinks"
+          class="ma-pruefauswahl"
+          type="number"
+          step="0.1"
+        >
+      </label>
+
+      <label>
+        Oben (%)
+        <input
+          id="maElementOben"
+          class="ma-pruefauswahl"
+          type="number"
+          step="0.1"
+        >
+      </label>
+
+      <label>
+        Breite (%)
+        <input
+          id="maElementBreite"
+          class="ma-pruefauswahl"
+          type="number"
+          min="0.1"
+          step="0.1"
+        >
+      </label>
+    </div>
+
+    <p>
+      Größere Links-Werte verschieben nach rechts.
+      Größere Oben-Werte verschieben nach unten.
+      Die Breite verändert die Größe proportional.
+    </p>
+
+    <label class="ma-prueflabel" for="maElementWerte">
+      Angepasste Werte zum Übernehmen
+    </label>
+
+    <textarea
+      id="maElementWerte"
+      readonly
+      rows="10"
+      spellcheck="false"
+      style="
+        display: block;
+        box-sizing: border-box;
+        width: 100%;
+        padding: 8px;
+        font-family: monospace;
+        font-size: 12px;
+      "
+    ></textarea>
+
+    <p>
+      Diese Änderungen gelten zunächst nur bis zum Neuladen.
+      Kopiere den gesamten Text aus dem Feld und ersetze damit
+      den bisherigen VORDERSEITEN-Block in maeusealarm.js.
+    </p>
+  `;
+
+  ui.zimmer.after(editor);
+
+  const auswahl = editor.querySelector("#maElementAuswahl");
+  const ausgabe = editor.querySelector("#maElementWerte");
+
+  const eingaben = [
+    editor.querySelector("#maElementLinks"),
+    editor.querySelector("#maElementOben"),
+    editor.querySelector("#maElementBreite")
+  ];
+
+  VORDERSEITEN.forEach((vorderseite, index) => {
+    const option = document.createElement("option");
+
+    option.value = String(index);
+    option.textContent =
+      `${vorderseite.versteck}: ${vorderseite.datei}`;
+
+    auswahl.append(option);
+  });
+
+  function werteAusgeben() {
+    ausgabe.value =
+      "const VORDERSEITEN = " +
+      JSON.stringify(VORDERSEITEN, null, 2) +
+      ";";
+  }
+
+  function markierungAktualisieren() {
+    // Vorherige Markierung entfernen.
+    plaetze.forEach((platz) => {
+      platz.vorderseiteBild?.style.removeProperty("outline");
+    });
+
+    if (!editor.open) {
+      return;
+    }
+
+    const vorderseite = VORDERSEITEN[Number(auswahl.value)];
+    const bild = plaetze[
+      vorderseite.versteck - 1
+    ]?.vorderseiteBild;
+
+    if (bild) {
+      bild.style.outline = "2px dashed #7ee8ff";
+    }
+  }
+
+  function auswahlAnzeigen() {
+    const vorderseite = VORDERSEITEN[Number(auswahl.value)];
+
+    eingaben.forEach((eingabe, index) => {
+      eingabe.value = String(vorderseite.position[index]);
+    });
+
+    markierungAktualisieren();
+  }
+
+  function positionUebernehmen() {
+    if (eingaben.some((eingabe) => eingabe.value.trim() === "")) {
+      return;
+    }
+
+    const position = eingaben.map((eingabe) => {
+      return Number(eingabe.value);
+    });
+
+    if (
+      !position.every(Number.isFinite) ||
+      position[2] <= 0
+    ) {
+      return;
+    }
+
+    const vorderseite = VORDERSEITEN[Number(auswahl.value)];
+    const bild = plaetze[
+      vorderseite.versteck - 1
+    ]?.vorderseiteBild;
+
+    if (!bild) {
+      return;
+    }
+
+    vorderseite.position = position;
+
+    const [links, oben, breite] = position;
+
+    bild.style.setProperty("--ma-vorderlinks", `${links}%`);
+    bild.style.setProperty("--ma-vorderoben", `${oben}%`);
+    bild.style.setProperty("--ma-vorderbreite", `${breite}%`);
+
+    werteAusgeben();
+  }
+
+  auswahl.addEventListener("change", auswahlAnzeigen);
+  editor.addEventListener("toggle", markierungAktualisieren);
+
+  eingaben.forEach((eingabe) => {
+    eingabe.addEventListener("input", positionUebernehmen);
+  });
+
+  ausgabe.addEventListener("click", () => {
+    ausgabe.select();
+  });
+
+  auswahlAnzeigen();
+  werteAusgeben();
+}
+
+
+  
+
+function erlaubteMaeuse(platz) {
+  /*
+   * Eine fehlende Vorderseite sperrt nur dieses Versteck.
+   * Bodenplätze haben keine Vorderseite und bleiben verfügbar.
+   */
+  if (platz.vorderseiteBereit === false) {
+    return [];
+  }
+
+  const erlaubteDateien = Array.isArray(
+    platz.versteck.mausdateien
+  )
+    ? platz.versteck.mausdateien
+    : [];
+
+  return verfuegbareMaeuse.filter((maus) => {
+    return erlaubteDateien.includes(maus.datei);
+  });
+}
+
+function erlaubteKatzen(platz) {
+  if (platz.vorderseiteBereit === false) {
+    return [];
+  }
+
+  const versteck = platz.versteck;
+
+  if (!versteck.katzenErlaubt) {
+    return [];
+  }
+
+  const erlaubtePosen = versteck.katzenposen ?? [
+    versteck.katzenpose ?? "liegen"
+  ];
+
+  const zusaetzlicheDateien =
+    versteck.zusaetzlicheKatzendateien ?? [];
+
+  // Namen aller Katzen sammeln, die gerade aktiv sind.
+  // Unterschiedliche Bildposen zählen als dieselbe Katze.
+  const aktiveKatzennamen = new Set(
+    plaetze
+      .filter((andererPlatz) => {
+        return andererPlatz.tier?.art === "katze";
+      })
+      .map((andererPlatz) => {
+        return andererPlatz.tier.name;
+      })
+  );
+
+  return verfuegbareKatzen.filter((katze) => {
+    // Eine bereits aktive Katze darf nicht erneut auftauchen.
+    if (aktiveKatzennamen.has(katze.name)) {
+      return false;
+    }
+
+    const pose = katze.pose ?? "liegen";
+
+    return (
+      erlaubtePosen.includes(pose) ||
+      zusaetzlicheDateien.includes(katze.datei)
+    );
+  });
+}
 
 function tierZeigen(platz, tier, dauer) {
   const versteck = platz.versteck;
@@ -648,9 +1035,13 @@ function tierZeigen(platz, tier, dauer) {
     const allgemeinerVersatz =
       versteck.figurOffsetY ?? 0;
 
-    const tierVersatz = istKatze
-      ? (versteck.katzenOffsetY ?? 0)
-      : (versteck.mausOffsetY ?? 0);
+	const tierVersatz = istKatze
+	  ? (
+		  versteck.katzenOffsetYNachPose?.[tier.pose ?? "liegen"] ??
+		  versteck.katzenOffsetY ??
+		  0
+		)
+	  : (versteck.mausOffsetY ?? 0);
 
     platz.bild.style.top =
       `${50 + allgemeinerVersatz + tierVersatz}%`;
@@ -759,6 +1150,7 @@ function tierZeigen(platz, tier, dauer) {
     vergangen = 0;
     naechstesTier = 350;
 	letztesVersteck = null;
+	maeuseInFolge = 0;
     status = bilderBereit ? "bereit" : "laden";
 
     ui.pruefmodus.value = "aus";
@@ -826,68 +1218,130 @@ function tierZeigen(platz, tier, dauer) {
 
 function tierAuftauchen() {
   const regeln = tagesregeln(tag);
+
+  // Neue Einstellungen für die Abwechslung.
+  const KATZENCHANCE = 0.60;
+  const KATZENPAARCHANCE = 0.30;
+  const MAX_MAEUSE_IN_FOLGE = 2;
+
+  // Schon ab Tag 1 können zwei Figuren gleichzeitig sichtbar sein.
+  // Spätere Tage behalten ihre gegebenenfalls höhere Gesamtgrenze.
+  const maximumSichtbar = Math.max(2, regeln.gleichzeitig);
+
   const aktive = plaetze.filter((platz) => platz.tier);
 
-  if (aktive.length >= regeln.gleichzeitig) {
+  if (aktive.length >= maximumSichtbar) {
     return;
   }
 
+  const sichtbareKatzen = aktive.filter((platz) => {
+    return platz.tier.art === "katze";
+  }).length;
+
   const kandidaten = plaetze
     .filter((platz) => {
-      // Kein aktives und kein direkt zuvor verwendetes Versteck.
+      // Aktive und direkt zuvor verwendete Verstecke ausschließen.
       return !platz.tier && platz !== letztesVersteck;
     })
     .map((platz) => ({
       platz,
       maeuse: erlaubteMaeuse(platz),
-      katzen: erlaubteKatzen(platz)
-    }))
-    .filter((kandidat) => {
-      // Auch reine Katzenverstecke dürfen teilnehmen.
-      return kandidat.maeuse.length > 0 ||
-        kandidat.katzen.length > 0;
-    });
 
-  const kandidat = auswaehlen(kandidaten);
+      // Höchstens zwei Katzen gleichzeitig.
+      katzen: sichtbareKatzen < 2
+        ? erlaubteKatzen(platz)
+        : []
+    }));
+
+  const mausKandidaten = kandidaten.filter((kandidat) => {
+    return kandidat.maeuse.length > 0;
+  });
+
+  const katzenKandidaten = kandidaten.filter((kandidat) => {
+    return kandidat.katzen.length > 0;
+  });
+
+  let art;
+
+  if (maeuseInFolge >= MAX_MAEUSE_IN_FOLGE) {
+    // Nach zwei Mäusen darf keine dritte folgen.
+    art = "katze";
+  } else if (mausKandidaten.length === 0) {
+    art = "katze";
+  } else if (katzenKandidaten.length === 0) {
+    art = "maus";
+  } else {
+    art = Math.random() < KATZENCHANCE
+      ? "katze"
+      : "maus";
+  }
+
+  const auswahl = art === "katze"
+    ? katzenKandidaten
+    : mausKandidaten;
+
+  const kandidat = auswaehlen(auswahl);
 
   if (!kandidat) {
-    // Nicht auf das vorige Versteck zurückfallen.
-    // Stattdessen bis zum nächsten Auftauchversuch warten.
+    // Ist nach zwei Mäusen gerade kein Katzenversteck frei,
+    // warten wir, statt die Abwechslungsregel zu brechen.
     return;
   }
 
-  const { platz, maeuse, katzen } = kandidat;
+  function anzeigenUndMerken(kandidat, tierart) {
+    const tiere = tierart === "katze"
+      ? kandidat.katzen
+      : kandidat.maeuse;
 
-  let tier = null;
+    const tier = auswaehlen(tiere);
 
-  if (maeuse.length === 0) {
-    // Kartons: ausschließlich passende sitzende Katzen.
-    tier = auswaehlen(katzen);
-  } else if (katzen.length === 0) {
-    // Beispielsweise Position 3: ausschließlich Mäuse.
-    tier = auswaehlen(maeuse);
-  } else {
-    // Gemischte Verstecke behalten ihre bisherige Zufallsauswahl.
-    const istKatze =
-      Math.random() < regeln.katzenanteil;
+    if (!tier) {
+      return false;
+    }
 
-    tier = istKatze
-      ? auswaehlen(katzen)
-      : auswaehlen(maeuse);
+    tierZeigen(
+      kandidat.platz,
+      tier,
+      regeln.sichtbar * zufall(0.9, 1.1)
+    );
+
+    letztesVersteck = kandidat.platz;
+
+    // Gezählt werden erschienene Mäuse,
+    // unabhängig davon, ob sie gefangen wurden.
+    maeuseInFolge = tierart === "maus"
+      ? maeuseInFolge + 1
+      : 0;
+
+    return true;
   }
 
-  if (!tier) {
+  if (!anzeigenUndMerken(kandidat, art)) {
     return;
   }
 
-  tierZeigen(
-    platz,
-    tier,
-    regeln.sichtbar * zufall(0.9, 1.1)
-  );
+  // Gelegentlich eine zweite Katze gleichzeitig zeigen.
+  // Nur wenn vorher keine Katze sichtbar war und noch Platz ist.
+  const darfKatzenpaar =
+    art === "katze" &&
+    sichtbareKatzen === 0 &&
+    aktive.length + 1 < maximumSichtbar;
 
-  // Erst nach dem tatsächlichen Anzeigen merken.
-  letztesVersteck = platz;
+  if (
+    darfKatzenpaar &&
+    Math.random() < KATZENPAARCHANCE
+  ) {
+    const zweiteAuswahl = katzenKandidaten.filter((weiterer) => {
+      return !weiterer.platz.tier &&
+        weiterer.platz !== letztesVersteck;
+    });
+
+    const zweiteKatze = auswaehlen(zweiteAuswahl);
+
+    if (zweiteKatze) {
+      anzeigenUndMerken(zweiteKatze, "katze");
+    }
+  }
 }
 
   function spielschritt(zeitpunkt) {
@@ -1050,14 +1504,24 @@ ui.meldung.textContent = modus === "katze"
       ? "Weiter →"
       : "Nochmal versuchen ↻";
 
-    ui.dialogBild.hidden = true;
+	ui.dialogBild.hidden = true;
+	ui.dialogBild.removeAttribute("src");
+	ui.dialogBild.alt = "";
 
-    if (erfolg && verfuegbareKatzen.length > 0) {
-      const katze = auswaehlen(verfuegbareKatzen);
-      ui.dialogBild.src = BILDORDNER + katze.datei;
-      ui.dialogBild.alt = katze.name;
-      ui.dialogBild.hidden = false;
-    }
+	if (erfolg && verfuegbareAbschlusskatzen.length > 0) {
+	  // Pro Tag ein anderes Motiv.
+	  // Beim Wiederholen desselben Tages bleibt das Motiv gleich.
+	  const index =
+		(tag - 1) % verfuegbareAbschlusskatzen.length;
+
+	  const katze = verfuegbareAbschlusskatzen[index];
+
+	  ui.dialogBild.src = BILDORDNER + katze.datei;
+	  ui.dialogBild.alt =
+		`${katze.name} mit einer Spielzeugmaus`;
+
+	  ui.dialogBild.hidden = false;
+	}
 
     ui.meldung.textContent = ui.dialogTitel.textContent;
     anzeigen();
@@ -1124,11 +1588,12 @@ ui.meldung.textContent = modus === "katze"
 
   ui.pruefmodus.addEventListener("change", pruefmodusAnzeigen);
 
-  ui.weiter.addEventListener("click", () => {
-    ui.dialog.close();
-    tagVorbereiten(naechsterTag);
-    starten();
-  });
+	ui.weiter.addEventListener("click", () => {
+	  ui.dialog.close();
+
+	  // Nächsten Tag vorbereiten, aber nicht automatisch starten.
+	  tagVorbereiten(naechsterTag);
+	});
 
   ui.dialog.addEventListener("close", dialogStatusAktualisieren);
 
@@ -1142,18 +1607,41 @@ ui.meldung.textContent = modus === "katze"
     }
   });
 
+
   /* =========================================
      INITIALISIERUNG
      ========================================= */
 
+// false = Einstellfelder im Spiel ausblenden.
+// true  = Einstellfelder wieder anzeigen.
+const EINSTELLFELDER_ANZEIGEN = false;
+
+// Manuelle Anpassung der Vorderseiten ausblenden.
+const manuellesFeld = document
+  .getElementById("maElementAuswahl")
+  ?.closest("details");
+
+if (manuellesFeld) {
+  manuellesFeld.hidden = !EINSTELLFELDER_ANZEIGEN;
+}
+
+// Bildpositionen-Prüfmodus ausblenden.
+const pruefmodusFeld = ui.pruefmodus.closest("details");
+
+if (pruefmodusFeld) {
+  pruefmodusFeld.hidden = !EINSTELLFELDER_ANZEIGEN;
+}
+
   tageErgaenzen(10);
   tagVorbereiten(1);
 
-  const dateien = [
-    HINTERGRUND,
-    ...MAEUSE.map((maus) => maus.datei),
-    ...KATZEN.map((katze) => katze.datei)
-  ];
+	const dateien = [
+	  HINTERGRUND,
+	  ...MAEUSE.map((maus) => maus.datei),
+	  ...KATZEN.map((katze) => katze.datei),
+	  ...VORDERSEITEN.map((vorderseite) => vorderseite.datei),
+	  ...ABSCHLUSSKATZEN.map((katze) => katze.datei)
+	];
 
   Promise.all(dateien.map(bildLaden))
     .then((ergebnisse) => {
@@ -1163,6 +1651,44 @@ ui.meldung.textContent = modus === "katze"
           .map((ergebnis) => ergebnis.datei)
       );
 
+     ui.meldung.textContent =
+ 	 "Die Bilder werden vorbereitet.";
+
+	 // Kein Auslesen von Bildpunkten:
+	 // Das Spiel soll auch beim direkten Öffnen über file:// starten.
+
+      // Vorderseiten genau einmal einblenden.
+// Jedes Vorderseiten-Bild genau einmal vorbereiten.
+VORDERSEITEN.forEach((vorderseite) => {
+  const hauptplatz = plaetze[vorderseite.versteck - 1];
+  const bild = hauptplatz?.vorderseiteBild;
+
+  if (!bild) {
+    return;
+  }
+
+  const geladen = erfolgreich.has(vorderseite.datei);
+
+  const nummern = [
+    vorderseite.versteck,
+    ...(vorderseite.weitereVerstecke ?? [])
+  ];
+
+  nummern.forEach((nummer) => {
+    const platz = plaetze[nummer - 1];
+
+    if (platz) {
+      platz.vorderseiteBereit = geladen;
+    }
+  });
+
+  if (geladen) {
+    bild.src = BILDORDNER + vorderseite.datei;
+  }
+
+  bild.hidden = !geladen;
+});
+
       verfuegbareMaeuse = MAEUSE.filter((maus) => {
         return erfolgreich.has(maus.datei);
       });
@@ -1170,6 +1696,10 @@ ui.meldung.textContent = modus === "katze"
       verfuegbareKatzen = KATZEN.filter((katze) => {
         return erfolgreich.has(katze.datei);
       });
+	  
+	  verfuegbareAbschlusskatzen = ABSCHLUSSKATZEN.filter((katze) => {
+	    return erfolgreich.has(katze.datei);
+	  });
 
       bilderBereit =
         erfolgreich.has(HINTERGRUND) &&
@@ -1186,10 +1716,25 @@ ui.meldung.textContent = modus === "katze"
       }
     })
     .catch((fehler) => {
-      console.error("Mäusealarm: Fehler beim Vorbereiten.", fehler);
+      console.error(
+        "Mäusealarm: Fehler beim Vorbereiten.",
+        fehler
+      );
+
+      bilderBereit = false;
+      anzeigen();
 
       ui.meldung.textContent =
         "Die Vorbereitung wurde unterbrochen. " +
         "Die Browserkonsole zeigt den Fehler.";
+
+      ui.bildhinweis.hidden = false;
+      ui.bildhinweis.textContent =
+        "Vorbereitung fehlgeschlagen: " +
+        (
+          fehler instanceof Error
+            ? `${fehler.name}: ${fehler.message}`
+            : String(fehler)
+        );
     });
 })();
