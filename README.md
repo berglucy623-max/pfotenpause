@@ -1,4 +1,4 @@
-Mein erstes kleines mini-Game: 😺Katzenpension 🐾
+Mein erstes kleines mini-Game: Katzenpension😺
 # pfotenpause
 # memory
 # maeusealarm
