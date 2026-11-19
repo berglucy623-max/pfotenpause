@@ -9,10 +9,15 @@
 
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="maeusealarm.css">
+  <link rel="stylesheet" href="futter.css">
+  <link rel="stylesheet" href="futter-editor.css">
 
   <script src="pfotenpause.js" defer></script>
   <script src="memory.js" defer></script>
   <script src="maeusealarm.js" defer></script>
+  <script src="futter-layout.js" defer></script>
+  <script src="futter.js" defer></script>
+  <script src="futter-editor.js" defer></script>
 </head>
 
 <body>
@@ -164,9 +169,36 @@
               </svg>
             </span>
           </button>
+		  
+		  <button
+			  id="startFruehstueck"
+			  class="regalspiel regalspiel-fruehstueck"
+			  type="button"
+			  aria-label="Frühstück, bitte! spielen – Bestellungen der Katzen zubereiten"
+			>
+			  <span class="regal-vorschau" aria-hidden="true">
+				<img
+				  src="bilder/futter/futter-vorschau.png"
+				  alt=""
+				  draggable="false"
+				>
+			  </span>
+
+			  <span class="regalschild">
+				<strong>Frühstück, bitte!</strong>
+			  </span>
+
+			  <span class="regal-play" aria-hidden="true">
+				<svg viewBox="0 0 24 24" focusable="false">
+				  <path d="M8 5 L19 12 L8 19 Z"></path>
+				</svg>
+			 </span>
+		  </button>
+		  
         </div>
       </div>
-
+	 
+	 
       <p id="eingangBildhinweis" class="bildhinweis" hidden>
         Das Eingangsbild fehlt. Prüfe die Datei bilder/eingang.png.
         Die Spiele kannst du trotzdem auswählen.
@@ -463,9 +495,11 @@
         <summary>Bildpositionen prüfen</summary>
 
         <p>
-          In diesem Modus läuft keine Zeit.
-          Die vier Öffnungen werden markiert und die Tiere bleiben sichtbar.
-        </p>
+		  In diesem Modus läuft keine Zeit.
+		  Alle neun Plätze werden markiert.
+		  Tiere bleiben an den für sie erlaubten Plätzen sichtbar.
+		  Die Rechtecke markieren die Tippflächen, nicht den Bildzuschnitt.
+		</p>
 
         <label class="ma-prueflabel" for="maPruefmodus">
           Vorschau auswählen
@@ -536,6 +570,180 @@
         </button>
       </div>
     </dialog>
+
+
+<!-- 6. FRÜHSTÜCK, BITTE! -->
+<section
+  id="fruehstueckseite"
+  class="fr-seite"
+  aria-labelledby="fruehstuecktitel"
+  hidden
+>
+  <nav class="spielnavigation" aria-label="Spielnavigation">
+    <button
+      id="frZurAuswahl"
+      class="knopf dezent"
+      type="button"
+    >
+      ← Spielauswahl
+    </button>
+
+    <select
+      id="frTagAuswahl"
+      class="levelauswahl"
+      aria-label="Tag auswählen"
+    ></select>
+  </nav>
+
+  <header class="spielkopf">
+    <p class="untertitel">Die Frühstücksausgabe ist geöffnet</p>
+    <h1 id="fruehstuecktitel" tabindex="-1">Frühstück, bitte!</h1>
+    <p>Wähle Napf und Futter. Serviere deiner wartenden Katze ihr Frühstück.</p>
+  </header>
+
+  <details class="regeln">
+    <summary>Wie wird gespielt?</summary>
+    <p>
+      Die Katze zeigt ihren Wunsch in der Sprechblase.
+      Wähle links den passenden Napf und das passende Futter.
+      Mit „Servieren“ gibst du die Bestellung ab.
+    </p>
+    <p>
+      Beim Zusammenstellen darfst du deine Auswahl ändern.
+      Eine richtige Bestellung macht die Katze glücklich.
+      Bei einer falschen Bestellung wird sie ärgerlich.
+      Anschließend kommt die nächste Katze. Es gibt kein Zeitlimit.
+    </p>
+  </details>
+  
+  <div class="fr-bedienung">
+	  <button
+		id="frStart"
+		class="knopf primaer"
+		type="button"
+		disabled
+	  >
+		Tag starten →
+	  </button>
+
+	  <button
+		id="frNeu"
+		class="knopf"
+		type="button"
+		disabled
+	  >
+		Neustart ↻
+	  </button>
+	</div>
+
+  <div class="fr-anzeigen">
+    <p id="frZaehler">Katze 1 von 5</p>
+    <p id="frPunkte">Richtig: 0</p>
+  </div>
+
+  <div id="frSzene" class="fr-szene" data-phase="laden">
+    <img
+      id="frHintergrund"
+      class="fr-hintergrund"
+      src="bilder/futter/esszimmer.png"
+      alt="Das gemütliche Esszimmer der Katzenpension."
+      draggable="false"
+    >
+
+	<aside class="fr-leiste" aria-label="Frühstück zusammenstellen">
+	  <div class="fr-auswahlbereiche">
+		<fieldset class="fr-auswahlgruppe">
+		  <legend>1. Napf</legend>
+		  <div id="frNapfOptionen" class="fr-optionen"></div>
+		</fieldset>
+
+		<fieldset class="fr-auswahlgruppe">
+		  <legend>2. Futter</legend>
+		  <div id="frFutterOptionen" class="fr-optionen"></div>
+		</fieldset>
+	  </div>
+
+	  <div class="fr-servierbereich">
+		<div id="frVorschau" class="fr-vorschau">
+		  <span class="fr-vorschauhinweis">Dein Frühstück</span>
+		</div>
+
+		<button
+		  id="frServieren"
+		  class="knopf primaer"
+		  type="button"
+		  disabled
+		>
+		  Servieren
+		</button>
+	  </div>
+	</aside>
+
+    <img
+      id="frTresen"
+      class="fr-tresen"
+      src="bilder/futter/thresen.png"
+      alt=""
+      draggable="false"
+    >
+
+    <div id="frKatze" class="fr-katze" hidden></div>
+    <div id="frNapf" class="fr-napf" hidden></div>
+
+    <div id="frBlase" class="fr-sprechblase" hidden>
+      <strong id="frKatzenname" class="fr-katzenname"></strong>
+      <p id="frWunsch" class="fr-wunsch"></p>
+      <div
+        id="frWunschbilder"
+        class="fr-wunschbilder"
+        aria-hidden="true"
+		hidden
+      ></div>
+    </div>
+  </div>
+
+  <p id="frMeldung" class="fr-meldung" role="status" hidden>
+    Die Frühstücksausgabe wird vorbereitet.
+  </p>
+
+  <p
+    id="frBildhinweis"
+    class="bildhinweis"
+    hidden
+  ></p>
+
+  <!-- Eigenes Abschlussfenster, unabhängig von den anderen Spielen. -->
+  <dialog
+    id="frAbschluss"
+    class="spiel-abschluss"
+    aria-labelledby="frAbschlussTitel"
+    aria-describedby="frAbschlussText"
+  >
+    <div id="frAbschlussBild" class="fr-abschlussbild"></div>
+
+    <h2 id="frAbschlussTitel"></h2>
+    <p id="frAbschlussText"></p>
+
+    <div class="abschluss-aktionen">
+      <button
+        id="frWeiter"
+        class="knopf primaer"
+        type="button"
+        autofocus
+      >
+        Weiter →
+      </button>
+
+      <button
+        id="frAbschlussAuswahl"
+        class="knopf"
+        type="button"
+      >
+        Zurück zur Spielauswahl
+      </button>
+    </div>
+  </dialog>
+</section>
 
     <noscript>
       Für die Spiele muss JavaScript aktiviert sein.

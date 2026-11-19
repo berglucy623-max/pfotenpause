@@ -57,7 +57,7 @@ const levelListe = [
     bereiche: [
       [1, 4, 0, 0, 0],
       [1, 0, 0, 0, 3],
-      [1, 2, 0, 0, 3],
+      [1, 2, 2, 0, 3],
       [1, 2, 0, 0, 3],
       [1, 2, 0, 0, 3]
     ]
@@ -82,6 +82,39 @@ const levelListe = [
       [0, 0, 2, 1, 1],
       [0, 0, 2, 2, 2],
       [0, 0, 0, 2, 2]
+    ]
+  },
+  
+    {
+    name: "Tag 8",
+    bereiche: [
+      [2, 1, 3, 0, 0],
+      [2, 3, 3, 0, 0],
+      [2, 3, 3, 4, 0],
+      [2, 3, 3, 4, 0],
+      [2, 3, 4, 4, 0]
+    ]
+  },
+  
+    {
+    name: "Tag 9",
+    bereiche: [
+      [1, 0, 2, 2, 2],
+      [1, 2, 2, 2, 4],
+      [1, 3, 2, 2, 4],
+      [1, 3, 2, 2, 4],
+      [1, 3, 3, 2, 4]
+    ]
+  },
+  
+    {
+    name: "Tag 10",
+    bereiche: [
+      [4, 4, 1, 1, 3],
+      [4, 1, 1, 1, 1],
+      [2, 0, 1, 1, 3],
+      [2, 0, 1, 4, 3],
+      [2, 0, 0, 4, 3]
     ]
   }
 ];
@@ -214,7 +247,8 @@ const seitenTitel = {
   startseite: "starttitel",
   eingangsseite: "eingangstitel",
   spielseite: "spieltitel",
-  memoryseite: "memorytitel"
+  memoryseite: "memorytitel",
+  fruehstueckseite: "fruehstuecktitel"
 };
 
 // Seitenwechsel verändert keine Spielstände.
